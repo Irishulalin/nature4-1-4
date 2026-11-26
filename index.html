@@ -1,0 +1,2428 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="artifact-type" content="narrative">
+  <meta name="design-style" content="riso">
+  <title>四上康軒自然第四課：好玩的電路 — 互動學習實驗室</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Mono:wght@400;700&family=Work+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+
+      /* 1. Riso Style Tokens */
+      --background: #f7f3ea;
+      --surface-container-low: #ffffff;
+      --surface-container: #efe8d8;
+      --surface-container-high: #fff8b3;
+
+      --on-surface: #1d2a5a;
+      --on-surface-variant: #3d4775;
+
+      --outline: #1d2a5a;
+      --outline-variant: #c3c6d9;
+
+      --primary: #006aa8;
+      --on-primary: #ffffff;
+      --primary-container: #ffe800;
+      --on-primary-container: #1d2a5a;
+      --secondary: #ff52b4;
+      --tertiary: #d00074;
+      --error: #c0262d;
+      --on-error: #ffffff;
+
+      --data-1: #0078bf;
+      --data-2: #d00074;
+      --data-3: #1d2a5a;
+      --data-4: #d9531e;
+      --data-context: #b4b8cc;
+
+      --font-headline: 'Noto Sans TC', 'Archivo', sans-serif;
+      --font-body: 'Noto Sans TC', 'Work Sans', sans-serif;
+      --font-label: 'Space Mono', 'Noto Sans TC', monospace;
+
+      --rounded: 0.25rem;
+      --rounded-lg: 0.5rem;
+      --rounded-full: 9999px;
+
+      --misregister: 3px 2px 0 rgb(255 82 180 / 0.85);
+      --ink-border: 2px solid var(--outline);
+      --ink-border-thin: 1px solid var(--outline-variant);
+      --offset-pink: 5px 5px 0 var(--secondary);
+      --offset-blue: 5px 5px 0 var(--primary);
+      --offset-navy: 5px 5px 0 var(--outline);
+      --offset-sm: 3px 3px 0 var(--primary);
+      --offset-sm-pink: 3px 3px 0 var(--secondary);
+      --halftone: radial-gradient(rgb(29 42 90 / 0.07) 1px, transparent 1.2px);
+      --halftone-size: 6px 6px;
+
+      /* 2. Lab Illustration Tokens (avoid inline hex in body) */
+      --bulb-glass: #f4f9ff;
+      --bulb-lit: #ffe800;
+      --bulb-lit-dim: #fff380;
+      --bulb-lit-bright: #ffd000;
+      --wire-copper: #d9531e;
+      --wire-jacket: #006aa8;
+      --wire-jacket-alt: #d00074;
+      --metal-silver: #9aa4bc;
+      --metal-dark: #4b5575;
+      --insulator-dark: #252c44;
+      --battery-body: #006aa8;
+      --battery-cap: #ffe800;
+      --wood-tone: #d4a36a;
+      --rubber-tone: #f597b6;
+      --cardboard-tone: #e2c799;
+
+      /* 3. Shared Foundation Tokens */
+      --positive: #0f7b4c;
+      --on-positive: #ffffff;
+      --warning: #b85d00;
+      --focus: #006aa8;
+
+      /* Narrative Type Scale */
+      --display-size: clamp(2.25rem, 1.5rem + 3.2vw, 3.75rem);
+      --headline-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.25rem);
+      --subhead-size: clamp(1.15rem, 1.05rem + 0.5vw, 1.4rem);
+      --body-size: clamp(1.0625rem, 1rem + 0.25vw, 1.1875rem);
+      --label-size: clamp(0.75rem, 0.72rem + 0.15vw, 0.875rem);
+
+      /* Spacing scale */
+      --space-xs: 0.25rem;
+      --space-sm: 0.5rem;
+      --space-md: 1rem;
+      --space-lg: 1.5rem;
+      --space-xl: 2.5rem;
+      --space-2xl: 4rem;
+      --space-3xl: 6rem;
+
+      /* Motion */
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+      --dur-micro: 120ms;
+      --dur-short: 220ms;
+      --dur-long: 420ms;
+    }
+
+    /* Base Reset */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
+      overflow-x: clip;
+      margin: 0;
+      padding: 0;
+      background-color: var(--background);
+      background-image: var(--halftone);
+      background-size: var(--halftone-size);
+      color: var(--on-surface);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      line-height: 1.65;
+      scroll-behavior: smooth;
+    }
+    header { position: static !important; }
+    button, input, select, textarea { font-family: inherit; }
+
+    :focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .page-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-2xl);
+      padding: var(--space-xl) var(--space-lg) var(--space-3xl);
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+    .page-grid * { min-width: 0; }
+
+    /* Typography & Riso Treatments */
+    h1, h2, h3, h4 {
+      font-family: var(--font-headline);
+      margin: 0;
+      color: var(--on-surface);
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+    p {
+      margin: 0;
+      max-width: 65ch;
+    }
+
+    .misregister {
+      font-family: var(--font-headline);
+      font-weight: 900;
+      color: var(--primary);
+      text-shadow: var(--misregister);
+    }
+
+    .display-title {
+      font-size: var(--display-size);
+      line-height: 1.15;
+      margin-top: var(--space-sm);
+      margin-bottom: var(--space-md);
+    }
+
+    .section-heading {
+      font-size: var(--headline-size);
+      line-height: 1.25;
+      margin-top: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .subhead {
+      font-size: var(--subhead-size);
+      font-weight: 800;
+      color: var(--on-surface);
+    }
+
+    .stamp {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      font-weight: 700;
+      background: var(--primary);
+      color: var(--on-primary);
+      border-radius: var(--rounded-full);
+      padding: var(--space-xs) var(--space-md);
+      line-height: 1.3;
+    }
+
+    .stamp-yellow {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      border: var(--ink-border);
+    }
+
+    .stamp-pink {
+      background: var(--secondary);
+      color: var(--on-surface);
+      border: var(--ink-border);
+    }
+
+    .stamp-positive {
+      background: var(--positive);
+      color: var(--on-positive);
+    }
+
+    .stamp-error {
+      background: var(--error);
+      color: var(--on-error);
+    }
+
+    .highlight-phrase {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      padding: 0 var(--space-xs);
+      font-weight: 700;
+    }
+
+    /* Ink Blocks & Containers */
+    .ink-block {
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--offset-pink);
+      padding: var(--space-xl);
+    }
+    .ink-block-blue {
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--offset-blue);
+      padding: var(--space-xl);
+    }
+    .ink-block-yellow {
+      background: var(--surface-container-high);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      box-shadow: var(--offset-blue);
+      padding: var(--space-lg);
+    }
+    .ink-well {
+      background: var(--surface-container);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+    }
+
+    .section-divider {
+      border: 0;
+      border-top: var(--ink-border);
+      margin: 0;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      font-family: var(--font-body);
+      font-size: var(--body-size);
+      font-weight: 700;
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      cursor: pointer;
+      background: var(--surface-container-low);
+      color: var(--on-surface);
+      box-shadow: var(--offset-sm);
+      transition: transform var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+      text-align: center;
+    }
+    .btn:hover:not(:disabled) {
+      transform: translate(1px, 1px);
+      box-shadow: 2px 2px 0 var(--primary);
+    }
+    .btn:active:not(:disabled) {
+      transform: translate(3px, 3px);
+      box-shadow: none;
+    }
+    .btn:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-primary {
+      background: var(--secondary);
+      color: var(--on-surface);
+      box-shadow: var(--offset-sm);
+    }
+    .btn-secondary {
+      background: var(--primary-container);
+      color: var(--on-primary-container);
+      box-shadow: var(--offset-sm);
+    }
+    .btn-blue {
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: var(--offset-sm-pink);
+    }
+    .btn-blue:hover:not(:disabled) {
+      box-shadow: 2px 2px 0 var(--secondary);
+    }
+    .btn.is-active {
+      background: var(--primary);
+      color: var(--on-primary);
+      box-shadow: var(--offset-sm-pink);
+    }
+
+    /* Hero & Progress Banner */
+    .hero-section {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+      gap: var(--space-xl);
+      align-items: start;
+    }
+    .hero-lede {
+      font-size: var(--subhead-size);
+      color: var(--on-surface-variant);
+      margin-bottom: var(--space-lg);
+      max-width: 56ch;
+    }
+    .nav-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+    .nav-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: var(--space-xs) var(--space-md);
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded-full);
+      color: var(--on-surface);
+      font-weight: 700;
+      font-size: var(--label-size);
+      text-decoration: none;
+      box-shadow: var(--offset-sm);
+      transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+    }
+    .nav-pill:hover {
+      background: var(--primary-container);
+      transform: translate(1px, 1px);
+    }
+
+    .progress-card {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: var(--space-sm);
+    }
+    .progress-big {
+      font-family: var(--font-headline);
+      font-weight: 900;
+      font-size: clamp(2rem, 1.5rem + 2vw, 2.75rem);
+      color: var(--on-surface);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .progress-track {
+      width: 100%;
+      height: 18px;
+      background: var(--surface-container);
+      border: var(--ink-border);
+      border-radius: var(--rounded-full);
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--primary);
+      transition: width var(--dur-long) var(--ease-out);
+    }
+    .mission-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: var(--space-xs);
+    }
+    .mission-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      font-size: var(--label-size);
+      font-weight: 700;
+      color: var(--on-surface-variant);
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--rounded);
+    }
+    .mission-item.done {
+      color: var(--positive);
+      background: var(--surface-container-low);
+    }
+    .mission-dot {
+      width: 14px;
+      height: 14px;
+      border: var(--ink-border);
+      border-radius: var(--rounded-full);
+      flex-shrink: 0;
+      background: var(--surface-container-low);
+    }
+    .mission-item.done .mission-dot {
+      background: var(--positive);
+      border-color: var(--positive);
+    }
+
+    /* Section Structure */
+    .lesson-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+    }
+    .section-intro {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .section-desc {
+      color: var(--on-surface-variant);
+      max-width: 65ch;
+    }
+
+    /* Container-queried Split Labs */
+    .lab-wrapper {
+      container-type: inline-size;
+    }
+    .lab-split {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      gap: var(--space-lg);
+      align-items: start;
+    }
+    @container (max-width: 720px) {
+      .lab-split {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* Interactive Stage SVG Canvas */
+    .stage-box {
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .stage-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      min-height: 240px;
+      background: var(--background);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+    }
+
+    /* Section 1: Anatomy Explorer */
+    .part-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+    .hotspot-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 44px;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      font-weight: 700;
+      color: var(--on-surface);
+      cursor: pointer;
+      text-align: left;
+      transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+    }
+    .hotspot-btn:hover {
+      background: var(--surface-container-high);
+      transform: translateX(2px);
+    }
+    .hotspot-btn.is-active {
+      background: var(--primary-container);
+      box-shadow: var(--offset-sm);
+    }
+    .hotspot-list {
+      display: grid;
+      gap: var(--space-sm);
+    }
+    .detail-callout {
+      background: var(--surface-container-high);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      padding: var(--space-md);
+    }
+    .svg-hotspot {
+      cursor: pointer;
+    }
+    .svg-hotspot:hover circle.hotspot-ring,
+    .svg-hotspot.is-active circle.hotspot-ring {
+      stroke: var(--tertiary);
+      stroke-width: 4;
+    }
+
+    /* Section 2: Circuit Builder */
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr));
+      gap: var(--space-sm);
+    }
+    .status-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      background: var(--surface-container);
+    }
+    .status-banner.status-on {
+      background: var(--surface-container-high);
+    }
+    .status-banner.status-short {
+      background: var(--surface-container-low);
+      border-color: var(--error);
+    }
+
+    /* Current Flow Animation */
+    @keyframes flowDash {
+      to {
+        stroke-dashoffset: -28;
+      }
+    }
+    .current-flow {
+      stroke: var(--primary-container);
+      stroke-width: 4;
+      stroke-dasharray: 8 10;
+      stroke-linecap: round;
+      fill: none;
+      animation: flowDash 0.8s linear infinite;
+    }
+    .current-flow-danger {
+      stroke: var(--error);
+      stroke-width: 5;
+      stroke-dasharray: 8 8;
+      stroke-linecap: round;
+      fill: none;
+      animation: flowDash 0.35s linear infinite;
+    }
+
+    /* Section 3: Conductivity Tester */
+    .mode-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    .material-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(140px, 100%), 1fr));
+      gap: var(--space-sm);
+    }
+    .material-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-xs);
+      min-height: 60px;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      cursor: pointer;
+      text-align: left;
+      color: var(--on-surface);
+      font-weight: 700;
+      box-shadow: 2px 2px 0 var(--outline-variant);
+      transition: transform var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+    }
+    .material-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--offset-sm);
+    }
+    .material-btn.is-selected {
+      background: var(--primary-container);
+      box-shadow: var(--offset-sm);
+    }
+    .material-tag {
+      font-family: var(--font-label);
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: var(--rounded-full);
+      border: 1px solid var(--outline);
+      background: var(--surface-container);
+    }
+    .material-tag.tag-conductor {
+      background: var(--positive);
+      color: var(--on-positive);
+      border-color: var(--positive);
+    }
+    .material-tag.tag-insulator {
+      background: var(--surface-container);
+      color: var(--on-surface-variant);
+    }
+    .predict-box {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-md);
+      background: var(--surface-container);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+    }
+    .sort-columns {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+    .sort-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-xs);
+      margin-top: var(--space-sm);
+    }
+    .sorted-chip {
+      font-size: var(--label-size);
+      font-weight: 700;
+      padding: var(--space-xs) var(--space-sm);
+      border-radius: var(--rounded);
+      border: var(--ink-border);
+      background: var(--surface-container-low);
+    }
+
+    /* Section 4: Switch Lab */
+    .switch-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+
+    /* Section 5: Series vs Parallel */
+    .compare-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+    .brightness-meter {
+      display: grid;
+      gap: var(--space-sm);
+      margin-top: var(--space-sm);
+    }
+    .meter-row {
+      display: grid;
+      grid-template-columns: 110px minmax(0, 1fr) 72px;
+      gap: var(--space-sm);
+      align-items: center;
+      font-size: var(--label-size);
+      font-weight: 700;
+    }
+    .meter-bar-bg {
+      height: 16px;
+      background: var(--surface-container);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      overflow: hidden;
+    }
+    .meter-bar-fill {
+      height: 100%;
+      background: var(--data-1);
+      transition: width var(--dur-short) var(--ease-out);
+    }
+    .meter-bar-fill.is-bright {
+      background: var(--primary-container);
+    }
+    .meter-bar-fill.is-dim {
+      background: var(--data-2);
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      margin-top: var(--space-md);
+    }
+    .compare-table th {
+      font-family: var(--font-label);
+      font-size: var(--label-size);
+      text-align: left;
+      padding: var(--space-sm);
+      border-bottom: var(--ink-border);
+      background: var(--surface-container);
+    }
+    .compare-table td {
+      padding: var(--space-sm);
+      border-bottom: var(--ink-border-thin);
+      vertical-align: top;
+    }
+    .compare-table tr.row-highlight td {
+      background: var(--surface-container-high);
+      font-weight: 700;
+    }
+
+    /* Section 6: Safety & Quiz */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+      gap: var(--space-md);
+    }
+    .safety-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-md);
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      box-shadow: var(--offset-sm);
+      cursor: pointer;
+      text-align: left;
+      transition: transform var(--dur-micro) var(--ease-out), background-color var(--dur-micro) var(--ease-out);
+    }
+    .safety-card:hover {
+      transform: translateY(-2px);
+    }
+    .safety-card.is-revealed {
+      background: var(--surface-container-high);
+    }
+    .safety-answer {
+      display: none;
+      padding-top: var(--space-sm);
+      border-top: var(--ink-border-thin);
+      font-size: 0.95rem;
+    }
+    .safety-card.is-revealed .safety-answer {
+      display: block;
+    }
+
+    /* Quiz */
+    .quiz-item {
+      background: var(--surface-container-low);
+      border: var(--ink-border);
+      border-radius: var(--rounded-lg);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .quiz-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+      gap: var(--space-sm);
+    }
+    .quiz-opt {
+      min-height: 48px;
+      padding: var(--space-sm) var(--space-md);
+      background: var(--surface-container);
+      border: var(--ink-border);
+      border-radius: var(--rounded);
+      text-align: left;
+      font-weight: 600;
+      color: var(--on-surface);
+      cursor: pointer;
+      transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+    }
+    .quiz-opt:hover:not(:disabled) {
+      background: var(--surface-container-high);
+      transform: translateY(-1px);
+    }
+    .quiz-opt.is-correct {
+      background: var(--positive);
+      color: var(--on-positive);
+    }
+    .quiz-opt.is-wrong {
+      background: var(--error);
+      color: var(--on-error);
+    }
+    .quiz-feedback {
+      padding: var(--space-sm) var(--space-md);
+      border-radius: var(--rounded);
+      border: var(--ink-border);
+      background: var(--surface-container-high);
+      font-size: 0.95rem;
+      display: none;
+    }
+    .quiz-feedback.is-visible {
+      display: block;
+    }
+
+    .footer-note {
+      padding-top: var(--space-lg);
+      border-top: var(--ink-border);
+      color: var(--on-surface-variant);
+      font-size: var(--label-size);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+
+    /* Mobile breakpoint */
+    @media (max-width: 640px) {
+      .page-grid {
+        padding: var(--space-md) var(--space-sm) var(--space-2xl);
+        gap: var(--space-xl);
+      }
+      .hero-section {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .ink-block, .ink-block-blue {
+        padding: var(--space-md);
+      }
+      .meter-row {
+        grid-template-columns: 90px minmax(0, 1fr) 60px;
+      }
+    }
+
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .current-flow, .current-flow-danger {
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-grid">
+
+    <!-- HERO & MISSION TRACKER -->
+    <header class="hero-section">
+      <div>
+        <span class="stamp">康軒四上自然 · 第四單元</span>
+        <h1 class="display-title misregister">好玩的電路：點亮小燈泡的祕密</h1>
+        <p class="hero-lede">
+          為什麼把乾電池放進玩具裡，馬達就會轉、燈泡就會發亮？跟著五個互動實驗室，一起拆解電池與燈泡的構造、測試導電物品、設計開關，並挑戰串聯與並聯的大謎題！
+        </p>
+        <nav class="nav-pills" aria-label="單元章節快速跳轉">
+          <a class="nav-pill" href="#sec-anatomy">01 認識電路三寶</a>
+          <a class="nav-pill" href="#sec-circuit">02 通路與斷路</a>
+          <a class="nav-pill" href="#sec-conductor">03 導體大測試</a>
+          <a class="nav-pill" href="#sec-switch">04 簡易開關</a>
+          <a class="nav-pill" href="#sec-series-parallel">05 串聯與並聯</a>
+          <a class="nav-pill" href="#sec-safety-quiz">06 安全與測驗</a>
+        </nav>
+      </div>
+
+      <aside class="ink-block progress-card" aria-label="學習任務進度">
+        <div class="progress-header">
+          <span class="stamp stamp-yellow">探索任務紀錄</span>
+          <span class="progress-big" id="progress-pct">0 / 5</span>
+        </div>
+        <div class="progress-track" aria-hidden="true">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <ul class="mission-list" id="mission-list">
+          <li class="mission-item" id="m-anatomy"><span class="mission-dot"></span><span>任務 1：點亮認識電池與燈泡構造</span></li>
+          <li class="mission-item" id="m-circuit"><span class="mission-dot"></span><span>任務 2：完成通路與短路測試</span></li>
+          <li class="mission-item" id="m-conductor"><span class="mission-dot"></span><span>任務 3：使用檢測器分類 5 種物品</span></li>
+          <li class="mission-item" id="m-series"><span class="mission-dot"></span><span>任務 4：比較電池與燈泡的串並聯</span></li>
+          <li class="mission-item" id="m-quiz"><span class="mission-dot"></span><span>任務 5：完成隨堂挑戰測驗</span></li>
+        </ul>
+        <button type="button" class="btn" id="reset-progress-btn" onclick="handleResetProgress(this)">
+          清除探索紀錄
+        </button>
+      </aside>
+    </header>
+
+    <hr class="section-divider">
+
+    <!-- SECTION 1: ANATOMY -->
+    <section id="sec-anatomy" class="lesson-section" aria-labelledby="h-anatomy">
+      <div class="section-intro">
+        <span class="stamp">01 · 電路三寶構造解剖</span>
+        <h2 id="h-anatomy" class="section-heading misregister">燈泡要發亮，必須接通「兩個接點」與電池「正負極」</h2>
+        <p class="section-desc">
+          一個最簡單的手電筒電路，只需要<span class="highlight-phrase">乾電池、電線、小燈泡</span>三樣元件。點選下方的零件分頁，再點擊零件上的編號部位，看看電流怎麼經過它們！
+        </p>
+      </div>
+
+      <div class="ink-block lab-wrapper">
+        <div class="part-tabs" role="tablist" aria-label="選擇電路元件">
+          <button type="button" class="btn is-active" id="tab-bulb" onclick="selectAnatomyPart('bulb')">小燈泡</button>
+          <button type="button" class="btn" id="tab-battery" onclick="selectAnatomyPart('battery')">乾電池</button>
+          <button type="button" class="btn" id="tab-wire" onclick="selectAnatomyPart('wire')">電線</button>
+        </div>
+
+        <div class="lab-split" style="margin-top: var(--space-lg);">
+          <div class="stage-box">
+            <svg id="anatomy-svg" class="stage-svg" viewBox="0 0 420 270" role="img" aria-label="電路元件構造互動圖"></svg>
+            <div class="detail-callout" id="anatomy-callout">
+              <strong id="anatomy-part-title">燈絲（發光處）</strong>
+              <p id="anatomy-part-desc" style="margin-top: var(--space-xs);">細細的金屬絲，電流經過時會變得非常熱而發出亮光。</p>
+            </div>
+          </div>
+
+          <div class="hotspot-list" id="anatomy-hotspots"></div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- SECTION 2: CIRCUIT CONNECTIONS -->
+    <section id="sec-circuit" class="lesson-section" aria-labelledby="h-circuit">
+      <div class="section-intro">
+        <span class="stamp">02 · 讓小燈泡發亮的秘密</span>
+        <h2 id="h-circuit" class="section-heading misregister">電流走成完整的圓圈叫「通路」，只用一條電線也能接亮！</h2>
+        <p class="section-desc">
+          小燈泡有「底部金屬接點」和「側面金屬螺紋」兩個接點。只要一個接點連到電池正極（+），另一個接點連到電池負極（-），就能形成通路。點選下面六種接法，觀察電流跑去哪裡了！
+        </p>
+      </div>
+
+      <div class="ink-block-blue lab-wrapper">
+        <div class="lab-split">
+          <div class="stage-box">
+            <svg id="circuit-svg" class="stage-svg" viewBox="0 0 460 280" role="img" aria-label="通路、斷路與短路實驗模擬圖"></svg>
+            <div class="status-banner" id="circuit-status-banner">
+              <span class="stamp stamp-positive" id="circuit-badge">通路 · 燈泡發亮</span>
+              <div>
+                <strong id="circuit-title">接法 A：底部接正極，電線連螺紋與負極</strong>
+                <p id="circuit-explain" style="margin-top: var(--space-xs);"></p>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <p class="subhead">試試看這 6 種接法：</p>
+            <div class="preset-grid" id="circuit-presets"></div>
+            <div class="ink-block-yellow">
+              <strong>觀察小筆記：</strong>
+              <p style="margin-top: var(--space-xs); font-size: 0.95rem;">
+                只要掌握「電池正負極」分別接觸「燈泡兩個不同接點」的原則，用 1 條電線就有 <strong>4 種接亮法</strong>！如果電線直接把電池正極和負極連起來（沒經過燈泡），會造成<strong>短路</strong>，電池會快速發熱發燙，非常危險喔！
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- SECTION 3: CONDUCTORS & INSULATORS -->
+    <section id="sec-conductor" class="lesson-section" aria-labelledby="h-conductor">
+      <div class="section-intro">
+        <span class="stamp">03 · 電路檢測器大考驗</span>
+        <h2 id="h-conductor" class="section-heading misregister">容易讓電流通過的是「導體」，阻擋電流的是「不良導體」</h2>
+        <p class="section-desc">
+          把電線剪開，中間夾入生活中的各種物品，這就是一台「簡易電路檢測器」。試著先猜猜看哪一樣物品能讓燈泡亮起來，再點選測試！
+        </p>
+      </div>
+
+      <div class="ink-block lab-wrapper">
+        <div class="mode-bar">
+          <div>
+            <strong class="subhead">步驟一：挑選物品並預測結果</strong>
+          </div>
+          <span class="stamp stamp-yellow" id="tested-count-badge">已測試 0 / 10 項</span>
+        </div>
+
+        <div class="lab-split" style="margin-top: var(--space-md);">
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <div class="material-grid" id="material-grid"></div>
+
+            <div class="predict-box" id="predict-box">
+              <strong id="selected-mat-label">已選擇：迴紋針（鐵）</strong>
+              <span style="font-size: 0.95rem; color: var(--on-surface-variant);">你猜燈泡會亮嗎？</span>
+              <button type="button" class="btn btn-secondary" onclick="testMaterial(true)">我猜會亮（導體）</button>
+              <button type="button" class="btn" onclick="testMaterial(false)">我猜不會亮（不良導體）</button>
+            </div>
+          </div>
+
+          <div class="stage-box">
+            <svg id="tester-svg" class="stage-svg" viewBox="0 0 420 250" role="img" aria-label="簡易電路檢測器模擬圖"></svg>
+            <div class="detail-callout" id="tester-result-box">
+              <strong id="tester-result-title">請先從左側選一個物品進行預測與測試</strong>
+              <p id="tester-result-desc" style="margin-top: var(--space-xs);">觀察電流是否能順利通過夾在兩個夾子中間的物體。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="sort-columns" style="margin-top: var(--space-lg);">
+          <div class="ink-well">
+            <span class="stamp stamp-positive">導體（會導電，燈泡亮）</span>
+            <div class="sort-list" id="list-conductors">
+              <span style="font-size: 0.9rem; color: var(--on-surface-variant);">測試後會自動分類到這裡</span>
+            </div>
+          </div>
+          <div class="ink-well">
+            <span class="stamp">不良導體（不導電，燈泡暗）</span>
+            <div class="sort-list" id="list-insulators">
+              <span style="font-size: 0.9rem; color: var(--on-surface-variant);">測試後會自動分類到這裡</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ink-block-yellow" style="margin-top: var(--space-md);">
+          <strong>自然課常見陷阱題：</strong>
+          <p style="margin-top: var(--space-xs); font-size: 0.95rem;">
+            1. <strong>鉛筆芯</strong>是用「石墨」做成的，雖然不是金屬，但它<strong>是導體</strong>，可以導電喔！<br>
+            2. <strong>自來水</strong>因為含有礦物質等雜質，也會微弱導電，所以手濕濕的時候千萬不可以去碰插頭或開關。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- SECTION 4: SIMPLE SWITCH -->
+    <section id="sec-switch" class="lesson-section" aria-labelledby="h-switch">
+      <div class="section-intro">
+        <span class="stamp">04 · 動手設計簡易開關</span>
+        <h2 id="h-switch" class="section-heading misregister">利用導體與不良導體，做出控制通路與斷路的「開關」</h2>
+        <p class="section-desc">
+          我們每天都會按電燈開關，其實開關的祕密很簡單：壓下時讓兩塊金屬（導體）碰在一起形成<strong>通路</strong>；放開時利用彈性讓它們分開變成<strong>斷路</strong>。
+        </p>
+      </div>
+
+      <div class="ink-block-blue lab-wrapper">
+        <div class="lab-split">
+          <div class="stage-box">
+            <svg id="switch-svg" class="stage-svg" viewBox="0 0 440 240" role="img" aria-label="迴紋針簡易開關操作圖"></svg>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <div>
+              <p class="subhead">1. 操作開關狀態</p>
+              <div class="switch-controls" style="margin-top: var(--space-sm);">
+                <button type="button" class="btn btn-primary" id="btn-toggle-switch" onclick="toggleSwitchState()">
+                  按下開關（接通）
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <p class="subhead">2. 換換看開關的「活動壓片」材質</p>
+              <div class="switch-controls" style="margin-top: var(--space-sm);">
+                <button type="button" class="btn is-active" id="sw-mat-metal" onclick="setSwitchMaterial('metal')">鐵迴紋針（導體）</button>
+                <button type="button" class="btn" id="sw-mat-plastic" onclick="setSwitchMaterial('plastic')">塑膠條（不良導體）</button>
+                <button type="button" class="btn" id="sw-mat-paper" onclick="setSwitchMaterial('paper')">厚紙板條（不良導體）</button>
+              </div>
+            </div>
+
+            <div class="detail-callout" id="switch-explain-box">
+              <strong id="switch-status-title">開關目前是「打開（斷路）」</strong>
+              <p id="switch-status-desc" style="margin-top: var(--space-xs);">迴紋針彈起沒有碰到左邊的圖釘，電流無法通過，燈泡不會亮。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- SECTION 5: SERIES VS PARALLEL -->
+    <section id="sec-series-parallel" class="lesson-section" aria-labelledby="h-series">
+      <div class="section-intro">
+        <span class="stamp">05 · 串聯與並聯實驗室</span>
+        <h2 id="h-series" class="section-heading misregister">串聯與並聯差在哪？看看「亮度變化」與「拔掉一個會怎樣」</h2>
+        <p class="section-desc">
+          想讓燈泡變亮，多裝一顆電池一定有用嗎？想同時點亮兩顆燈泡，該怎麼接才不會變暗？切換下面的實驗主題，再試著<strong>「拿掉一顆電池」或「擰鬆一顆燈泡」</strong>看看會發生什麼事！
+        </p>
+      </div>
+
+      <div class="ink-block lab-wrapper">
+        <div class="compare-controls">
+          <button type="button" class="btn is-active" id="sp-mode-bat-series" onclick="setSPMode('bat-series')">電池串聯（2顆）</button>
+          <button type="button" class="btn" id="sp-mode-bat-parallel" onclick="setSPMode('bat-parallel')">電池並聯（2顆）</button>
+          <button type="button" class="btn" id="sp-mode-bulb-series" onclick="setSPMode('bulb-series')">燈泡串聯（2顆）</button>
+          <button type="button" class="btn" id="sp-mode-bulb-parallel" onclick="setSPMode('bulb-parallel')">燈泡並聯（2顆）</button>
+        </div>
+
+        <div class="lab-split" style="margin-top: var(--space-lg);">
+          <div class="stage-box">
+            <svg id="sp-svg" class="stage-svg" viewBox="0 0 460 270" role="img" aria-label="電池與燈泡串聯並聯比較圖"></svg>
+            <div style="display: flex; flex-wrap: wrap; gap: var(--space-sm); align-items: center;">
+              <button type="button" class="btn btn-secondary" id="sp-fault-btn" onclick="toggleSPFault()">
+                測試：拿掉其中 1 顆零件
+              </button>
+              <span class="stamp" id="sp-fault-badge">所有零件已裝妥</span>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: var(--space-md);">
+            <div class="detail-callout" id="sp-explain-card">
+              <strong id="sp-title">電池串聯：正極接負極，電力疊加更亮！</strong>
+              <p id="sp-desc" style="margin-top: var(--space-xs);"></p>
+            </div>
+
+            <div class="ink-well">
+              <strong style="font-size: 0.95rem;">燈泡亮度比一比（以 1 顆電池 + 1 顆燈泡為 100% 基準）</strong>
+              <div class="brightness-meter">
+                <div class="meter-row">
+                  <span>1 電池 + 1 燈泡</span>
+                  <div class="meter-bar-bg"><div class="meter-bar-fill" style="width: 50%;"></div></div>
+                  <span>標準亮</span>
+                </div>
+                <div class="meter-row">
+                  <span id="sp-meter-label">目前實驗組合</span>
+                  <div class="meter-bar-bg"><div class="meter-bar-fill is-bright" id="sp-meter-bar" style="width: 100%;"></div></div>
+                  <span id="sp-meter-val">很亮 (2x)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <table class="compare-table" aria-label="電池與燈泡串聯並聯總整理表">
+          <thead>
+            <tr>
+              <th>連接方式</th>
+              <th>接法特徵</th>
+              <th>燈泡亮度（相較 1 顆基準）</th>
+              <th>拿掉 / 壞掉其中 1 顆時</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr id="row-bat-series" class="row-highlight">
+              <td>電池串聯</td>
+              <td>正極接負極（頭尾排成一列）</td>
+              <td>明顯<strong>變亮</strong></td>
+              <td>形成斷路，燈泡<strong>不亮</strong></td>
+            </tr>
+            <tr id="row-bat-parallel">
+              <td>電池並聯</td>
+              <td>正極接正極、負極接負極（並排）</td>
+              <td>差不多（<strong>標準亮</strong>），但較持久</td>
+              <td>另一顆仍構成通路，燈泡<strong>還是會亮</strong></td>
+            </tr>
+            <tr id="row-bulb-series">
+              <td>燈泡串聯</td>
+              <td>兩個燈泡接在同一條迴路上</td>
+              <td>兩顆都<strong>變暗</strong></td>
+              <td>形成斷路，另一顆也<strong>不亮</strong></td>
+            </tr>
+            <tr id="row-bulb-parallel">
+              <td>燈泡並聯</td>
+              <td>兩個燈泡各自有獨立迴路連回電池</td>
+              <td>兩顆都<strong>一樣亮（標準亮）</strong></td>
+              <td>另一條迴路照常通電，另一顆<strong>依然會亮</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- SECTION 6: SAFETY & QUIZ -->
+    <section id="sec-safety-quiz" class="lesson-section" aria-labelledby="h-safety">
+      <div class="section-intro">
+        <span class="stamp">06 · 用電安全與隨堂挑戰</span>
+        <h2 id="h-safety" class="section-heading misregister">生活用電安全守則，與 5 題自然小測驗</h2>
+        <p class="section-desc">
+          先點擊下面四張生活情境卡，確認你都知道怎麼安全用電；接著完成 5 題隨堂挑戰，拿滿全部星星！
+        </p>
+      </div>
+
+      <div class="card-grid" id="safety-cards">
+        <button type="button" class="safety-card" onclick="toggleSafetyCard(this)">
+          <div>
+            <span class="stamp stamp-error">情境判斷 01</span>
+            <h3 class="subhead" style="margin-top: var(--space-sm);">剛洗完手還沒擦乾，就伸手去按電燈開關</h3>
+          </div>
+          <span style="font-size: 0.85rem; color: var(--primary); font-weight: 700;">點擊查看安全解答</span>
+          <div class="safety-answer">
+            <strong>危險！</strong>自來水含有雜質會導電，濕手碰觸開關或插頭容易發生觸電意外，一定要先擦乾雙手。
+          </div>
+        </button>
+
+        <button type="button" class="safety-card" onclick="toggleSafetyCard(this)">
+          <div>
+            <span class="stamp stamp-error">情境判斷 02</span>
+            <h3 class="subhead" style="margin-top: var(--space-sm);">一條延長線上同時插了吹風機、電鍋與電暖器</h3>
+          </div>
+          <span style="font-size: 0.85rem; color: var(--primary); font-weight: 700;">點擊查看安全解答</span>
+          <div class="safety-answer">
+            <strong>危險！</strong>同時使用太多高耗電電器會造成電流過載、電線發燙起火，應分開插在不同的獨立插座。
+          </div>
+        </button>
+
+        <button type="button" class="safety-card" onclick="toggleSafetyCard(this)">
+          <div>
+            <span class="stamp stamp-positive">情境判斷 03</span>
+            <h3 class="subhead" style="margin-top: var(--space-sm);">拔插頭時用手握住插頭本體，不直接拉扯電線</h3>
+          </div>
+          <span style="font-size: 0.85rem; color: var(--primary); font-weight: 700;">點擊查看安全解答</span>
+          <div class="safety-answer">
+            <strong>正確且安全！</strong>用力拉電線會讓裡面的銅線斷裂或塑膠絕緣皮破損，容易引起短路走火。
+          </div>
+        </button>
+
+        <button type="button" class="safety-card" onclick="toggleSafetyCard(this)">
+          <div>
+            <span class="stamp stamp-positive">情境判斷 04</span>
+            <h3 class="subhead" style="margin-top: var(--space-sm);">玩具的乾電池沒電了，交給超商或資源回收車回收</h3>
+          </div>
+          <span style="font-size: 0.85rem; color: var(--primary); font-weight: 700;">點擊查看安全解答</span>
+          <div class="safety-answer">
+            <strong>正確！</strong>廢電池含有化學物質與重金屬，不能當一般垃圾丟棄，做好回收才能保護土壤與水源。
+          </div>
+        </button>
+      </div>
+
+      <div class="ink-block-blue" style="display: flex; flex-direction: column; gap: var(--space-lg);">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--space-md);">
+          <div>
+            <span class="stamp stamp-pink">隨堂大挑戰</span>
+            <h3 class="subhead" style="margin-top: var(--space-xs);">康軒四上《好玩的電路》5 題闖關</h3>
+          </div>
+          <span class="stamp stamp-yellow" id="quiz-score-badge">目前得分：0 / 5</span>
+        </div>
+
+        <div id="quiz-container" style="display: grid; gap: var(--space-md);"></div>
+      </div>
+    </section>
+
+    <footer class="footer-note">
+      <span>資料架構依據：臺灣國小四年級上學期自然科學第四課（第四單元）〈好玩的電路〉核心教學概念整理</span>
+      <span>互動實驗室設計 · 無需外部器材即可安全操作電路實驗</span>
+    </footer>
+  </main>
+
+  <api-shim></api-shim>
+  <script>
+    // =========================================================
+    // 1. DATA DEFINITIONS (Backtick template literals throughout)
+    // =========================================================
+    const ANATOMY_DATA = {
+      bulb: {
+        label: `小燈泡`,
+        hotspots: [
+          {
+            id: `filament`,
+            name: `1. 燈絲`,
+            tag: `發光關鍵`,
+            desc: `位於玻璃罩中央的細金屬絲，當電流通過燈絲時會產生高熱並發出亮光。`
+          },
+          {
+            id: `glass`,
+            name: `2. 玻璃罩`,
+            tag: `透明保護`,
+            desc: `透明的玻璃外殼，用來保護脆弱的燈絲並隔絕空氣。注意：玻璃是「不良導體」，電線接在玻璃上是不會亮的喔！`
+          },
+          {
+            id: `thread`,
+            name: `3. 金屬螺紋（側接點）`,
+            tag: `第 1 個接點`,
+            desc: `燈泡側面的螺旋金屬殼，連接到燈絲的其中一端，是電流進出燈泡的兩個接點之一。`
+          },
+          {
+            id: `base`,
+            name: `4. 底部金屬接點`,
+            tag: `第 2 個接點`,
+            desc: `燈泡最底端凸起的灰色金屬點，連接到燈絲的另一端。必須和金屬螺紋分別接通電池正負極才會形成通路。`
+          }
+        ]
+      },
+      battery: {
+        label: `乾電池`,
+        hotspots: [
+          {
+            id: `pos`,
+            name: `1. 正極（+）`,
+            tag: `凸起金屬帽`,
+            desc: `電池頂端凸起來的金屬帽，通常印有「+」號，是電池電力的正極端點。`
+          },
+          {
+            id: `neg`,
+            name: `2. 負極（-）`,
+            tag: `平坦金屬底`,
+            desc: `電池底部平平的金屬面，通常印有「-」號，必須和正極一起連成迴路，燈泡才會發亮。`
+          },
+          {
+            id: `body`,
+            name: `3. 電池外殼`,
+            tag: `化學能儲存`,
+            desc: `裡面裝著能產生電力的化學物質。注意：不同型號電池電壓相同（都是 1.5V），但大顆電池電力能用比較久。`
+          }
+        ]
+      },
+      wire: {
+        label: `電線`,
+        hotspots: [
+          {
+            id: `copper`,
+            name: `1. 內部金屬銅線`,
+            tag: `導體`,
+            desc: `電線兩端剝開外皮後看到的金屬銅絲，屬於「導體」，專門讓電流順暢通過。`
+          },
+          {
+            id: `jacket`,
+            name: `2. 外層塑膠皮`,
+            tag: `不良導體`,
+            desc: `包在銅線外面的彩色塑膠皮，屬於「不良導體（絕緣體）」，能防止漏電與保護雙手不觸電。`
+          }
+        ]
+      }
+    };
+
+    const CIRCUIT_PRESETS = [
+      {
+        id: `way1`,
+        btnLabel: `接法 A（通路）`,
+        status: `on`,
+        badge: `通路 · 燈泡發亮`,
+        title: `接法 A：底部接正極，電線連螺紋與負極`,
+        explain: `電池正極（+）直接碰觸燈泡底部接點，電線把燈泡側面螺紋連回電池負極（-）。電流走過燈絲形成完整迴路，燈泡亮了！`
+      },
+      {
+        id: `way2`,
+        btnLabel: `接法 B（通路）`,
+        status: `on`,
+        badge: `通路 · 燈泡發亮`,
+        title: `接法 B：螺紋靠正極，電線連底部與負極`,
+        explain: `換個方向試試！讓燈泡側面螺紋靠著電池正極（+），電線連接燈泡底部接點與電池負極（-），兩個接點依然都有接通，照樣發亮！`
+      },
+      {
+        id: `way3`,
+        btnLabel: `接法 C（通路）`,
+        status: `on`,
+        badge: `通路 · 燈泡發亮`,
+        title: `接法 C：底部接負極，電線連螺紋與正極`,
+        explain: `就算把電池反過來放，只要燈泡底部接負極（-）、電線連接螺紋與正極（+），依然是一個封閉的通路，小燈泡照常發亮！`
+      },
+      {
+        id: `way4`,
+        btnLabel: `接法 D（通路）`,
+        status: `on`,
+        badge: `通路 · 燈泡發亮`,
+        title: `接法 D：螺紋靠負極，電線連底部與正極`,
+        explain: `這是第 4 種「1 條電線接亮法」！燈泡螺紋接觸負極（-），電線連接正極（+）與燈泡底部接點，電流一樣順利流過燈絲。`
+      },
+      {
+        id: `open`,
+        btnLabel: `錯誤 E（斷路）`,
+        status: `off`,
+        badge: `斷路 · 燈泡不亮`,
+        title: `斷路：電線只碰到螺紋或玻璃罩，沒有接通底部`,
+        explain: `這條電路沒有經過燈泡的「底部金屬接點」（或電線只碰在玻璃罩上），電流在半路斷掉了，所以無法形成通路，燈泡不會亮。`
+      },
+      {
+        id: `short`,
+        btnLabel: `錯誤 F（短路！）`,
+        status: `short`,
+        badge: `短路危險 · 電池發燙`,
+        title: `短路：電線直接連接電池正極與負極`,
+        explain: `電流走捷徑直接從正極衝回負極，完全沒有經過燈泡！燈泡不但不亮，大量電流還會讓電池和電線瞬間發熱變燙，非常危險，實驗時要馬上移開電線！`
+      }
+    ];
+
+    const MATERIALS_DATA = [
+      { id: `clip`, name: `迴紋針`, note: `鐵製文具`, isConductor: true, detail: `迴紋針是金屬鐵製成的，屬於「導體」，電流順利通過讓燈泡亮起！` },
+      { id: `eraser`, name: `橡皮擦`, note: `橡膠製品`, isConductor: false, detail: `橡皮擦是不導電的橡膠，屬於「不良導體」，電流被阻斷，燈泡不會亮。` },
+      { id: `coin`, name: `十元硬幣`, note: `銅鎳合金`, isConductor: true, detail: `硬幣是金屬合金製成，屬於「導體」，讓電路形成通路而發亮。` },
+      { id: `chopstick`, name: `竹筷子`, note: `乾燥木竹`, isConductor: false, detail: `乾燥的木頭與竹子屬於「不良導體」，無法讓電流通過。` },
+      { id: `foil`, name: `鋁箔紙`, note: `金屬鋁片`, isConductor: true, detail: `鋁箔紙雖然薄薄的，但成分是金屬鋁，屬於「導體」，燈泡會發亮！` },
+      { id: `ruler`, name: `塑膠尺`, note: `塑膠材質`, isConductor: false, detail: `塑膠屬於「不良導體」，就像電線外面的塑膠皮一樣可以阻絕電流。` },
+      { id: `pencil`, name: `鉛筆芯`, note: `石墨製成`, isConductor: true, detail: `特別注意！鉛筆芯是「石墨」做的，雖然不是金屬，但它「是導體」，燈泡會亮喔！` },
+      { id: `paper`, name: `白紙`, note: `紙張纖維`, isConductor: false, detail: `乾燥的紙張屬於「不良導體」，電流無法穿過白紙。` },
+      { id: `spoon`, name: `不鏽鋼湯匙`, note: `金屬不鏽鋼`, isConductor: true, detail: `不鏽鋼是金屬，屬於「導體」，可以讓電流順利通過。` },
+      { id: `thread`, name: `棉線`, note: `布料纖維`, isConductor: false, detail: `棉線屬於「不良導體」，無法取代電線讓燈泡發亮。` }
+    ];
+
+    const SP_MODES = {
+      'bat-series': {
+        title: `電池串聯：正極接負極，電力疊加更亮！`,
+        descNormal: `兩顆電池的「正極接負極」排成一列，總電力變成 2 倍，所以燈泡明顯比只用 1 顆電池時亮很多！`,
+        descFault: `拿掉其中 1 顆電池後，整條路徑就中斷變成「斷路」了！所以剩下的電池也沒辦法讓燈泡發亮。`,
+        brightnessNormal: 100,
+        brightnessFault: 0,
+        valNormal: `很亮 (2x)`,
+        valFault: `熄滅 (斷路)`
+      },
+      'bat-parallel': {
+        title: `電池並聯：正接正、負接負，亮度不變但更持久`,
+        descNormal: `兩顆電池並排連接（正極連正極、負極連負極），燈泡亮度和用 1 顆電池差不多，但兩顆電池一起分擔工作，可以亮得更久！`,
+        descFault: `就算拿掉其中 1 顆電池，另一顆電池仍然和燈泡連成完整的通路，所以燈泡「還是會亮」喔！`,
+        brightnessNormal: 50,
+        brightnessFault: 50,
+        valNormal: `標準亮 (1x)`,
+        valFault: `依然會亮 (1x)`
+      },
+      'bulb-series': {
+        title: `燈泡串聯：兩個燈泡排隊共用同一條電線`,
+        descNormal: `電流依序流過第 1 顆和第 2 顆燈泡，兩個燈泡一起分攤電力，所以兩顆燈泡都比單獨 1 顆時「較暗」。`,
+        descFault: `糟糕！只要擰鬆或拿掉其中 1 顆燈泡，整條迴路就變成斷路，另一顆燈泡「也會跟著熄滅」！`,
+        brightnessNormal: 28,
+        brightnessFault: 0,
+        valNormal: `較暗 (0.5x)`,
+        valFault: `全滅 (斷路)`
+      },
+      'bulb-parallel': {
+        title: `燈泡並聯：各自擁有獨立迴路，家裡電燈都這樣接！`,
+        descNormal: `兩個燈泡各自有自己的電線連回電池，兩顆都能獲得完整的電力，所以「兩顆都一樣亮」（和單獨 1 顆時相同）！`,
+        descFault: `因為每個燈泡走的是獨立迴路，就算把第 1 顆燈泡擰鬆或拿掉，第 2 顆燈泡的迴路依然是通路，所以「另一顆照常發亮」！`,
+        brightnessNormal: 50,
+        brightnessFault: 50,
+        valNormal: `一樣亮 (1x)`,
+        valFault: `另一顆仍亮 (1x)`
+      }
+    };
+
+    const QUIZ_DATA = [
+      {
+        q: `1. 想用 1 顆乾電池、1 條電線和 1 個小燈泡讓燈泡發亮，電線與電池應該怎麼接觸？`,
+        options: [
+          `燈泡的玻璃罩靠電池正極，電線連底部接點與負極`,
+          `燈泡的底部接點靠電池正極，電線連側面螺紋與負極`,
+          `電線直接把電池的正極和負極連起來，燈泡放在旁邊`,
+          `燈泡的側面螺紋和底部接點都同時接到電池正極`
+        ],
+        ans: 1,
+        explain: `燈泡有「底部接點」與「側面金屬螺紋」兩個接點，必須一個接正極、一個接負極形成通路才會亮；玻璃是不良導體，直接連電池正負極則會造成危險的短路！`
+      },
+      {
+        q: `2. 用簡易電路檢測器測試下列哪一組物品，兩樣都會讓燈泡發亮？`,
+        options: [
+          `橡皮擦、竹筷子`,
+          `迴紋針、塑膠尺`,
+          `鉛筆芯（石墨）、鋁箔紙`,
+          `十元硬幣、棉線`
+        ],
+        ans: 2,
+        explain: `鋁箔紙（金屬鋁）和鉛筆芯（石墨）都是導體，能讓電流通過；橡皮擦、竹筷、塑膠尺、棉線都是不良導體。`
+      },
+      {
+        q: `3. 房間裡有兩盞吸頂燈，當其中一盞燈泡壞掉不亮時，另一盞卻依然明亮。這兩盞燈泡是怎麼連接的？`,
+        options: [
+          `燈泡串聯`,
+          `燈泡並聯`,
+          `電池串聯`,
+          `電路短路`
+        ],
+        ans: 1,
+        explain: `燈泡並聯時，每顆燈泡都有各自獨立的迴路，一顆壞掉不會影響另一顆，家庭電燈與插座就是採用並聯設計。`
+      },
+      {
+        q: `4. 小明想要讓手電筒的小燈泡比平常「更亮」，他把 2 顆乾電池裝進手電筒時，應該採用哪種接法？`,
+        options: [
+          `電池串聯（一顆的正極接另一顆的負極）`,
+          `電池並聯（正極接正極、負極接負極）`,
+          `兩顆電池的負極對負極頂在一起`,
+          `只裝 1 顆電池，另一格留空`
+        ],
+        ans: 0,
+        explain: `電池串聯（正接負）會讓電力相加，燈泡會變得更亮；電池並聯亮度不變，但使用時間較持久。`
+      },
+      {
+        q: `5. 關於日常生活的用電安全，下列哪一個做法是「錯誤且危險」的？`,
+        options: [
+          `拔插頭時握住插頭本體拔除，不拉扯電線`,
+          `廢棄的乾電池拿到便利商店或資源回收點回收`,
+          `洗完手還沒擦乾，順手去壓壁上的電燈開關`,
+          `不用金屬湯匙或鐵絲去戳牆壁上的插座孔`
+        ],
+        ans: 2,
+        explain: `自來水含有雜質會導電，手濕濕的觸摸電源開關或插頭，電流可能經過身體造成觸電危險！`
+      }
+    ];
+
+    // =========================================================
+    // 2. APPLICATION STATE & PERSISTENCE
+    // =========================================================
+    const appState = {
+      anatomyPart: `bulb`,
+      anatomyHotspot: `filament`,
+      visitedAnatomy: [`bulb:filament`],
+      circuitPreset: `way1`,
+      visitedCircuits: [`way1`],
+      selectedMaterial: `clip`,
+      testedMaterials: {},
+      switchClosed: false,
+      switchMaterial: `metal`,
+      spMode: `bat-series`,
+      spFault: false,
+      visitedSP: [`bat-series`],
+      quizAnswers: {}
+    };
+
+    async function saveState() {
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.setAppState === `function`) {
+          await window.notebookAppApi.setAppState(appState);
+        }
+      } catch (err) {
+        // Silent fallback if host API is unavailable
+      }
+    }
+
+    async function loadState() {
+      try {
+        if (window.notebookAppApi && typeof window.notebookAppApi.getAppState === `function`) {
+          const saved = await window.notebookAppApi.getAppState();
+          if (saved && typeof saved === `object`) {
+            if (saved.anatomyPart && ANATOMY_DATA[saved.anatomyPart]) appState.anatomyPart = saved.anatomyPart;
+            if (saved.anatomyHotspot) appState.anatomyHotspot = saved.anatomyHotspot;
+            if (Array.isArray(saved.visitedAnatomy)) appState.visitedAnatomy = saved.visitedAnatomy;
+            if (saved.circuitPreset) appState.circuitPreset = saved.circuitPreset;
+            if (Array.isArray(saved.visitedCircuits)) appState.visitedCircuits = saved.visitedCircuits;
+            if (saved.selectedMaterial) appState.selectedMaterial = saved.selectedMaterial;
+            if (saved.testedMaterials && typeof saved.testedMaterials === `object`) appState.testedMaterials = saved.testedMaterials;
+            if (typeof saved.switchClosed === `boolean`) appState.switchClosed = saved.switchClosed;
+            if (saved.switchMaterial) appState.switchMaterial = saved.switchMaterial;
+            if (saved.spMode && SP_MODES[saved.spMode]) appState.spMode = saved.spMode;
+            if (typeof saved.spFault === `boolean`) appState.spFault = saved.spFault;
+            if (Array.isArray(saved.visitedSP)) appState.visitedSP = saved.visitedSP;
+            if (saved.quizAnswers && typeof saved.quizAnswers === `object`) appState.quizAnswers = saved.quizAnswers;
+          }
+        }
+      } catch (err) {
+        // Use defaults
+      }
+    }
+
+    // =========================================================
+    // 3. SECTION 1: ANATOMY EXPLORER
+    // =========================================================
+    function selectAnatomyPart(partKey) {
+      if (!ANATOMY_DATA[partKey]) return;
+      appState.anatomyPart = partKey;
+      appState.anatomyHotspot = ANATOMY_DATA[partKey].hotspots[0].id;
+      recordAnatomyVisit(partKey, appState.anatomyHotspot);
+      renderAnatomy();
+      updateProgress();
+      saveState();
+    }
+
+    function selectHotspot(spotId) {
+      appState.anatomyHotspot = spotId;
+      recordAnatomyVisit(appState.anatomyPart, spotId);
+      renderAnatomy();
+      updateProgress();
+      saveState();
+    }
+
+    function recordAnatomyVisit(partKey, spotId) {
+      const key = `${partKey}:${spotId}`;
+      if (!appState.visitedAnatomy.includes(key)) {
+        appState.visitedAnatomy.push(key);
+      }
+    }
+
+    function renderAnatomy() {
+      const partKey = appState.anatomyPart;
+      const part = ANATOMY_DATA[partKey];
+      if (!part) return;
+
+      [`bulb`, `battery`, `wire`].forEach(k => {
+        const btn = document.getElementById(`tab-${k}`);
+        if (btn) btn.classList.toggle(`is-active`, k === partKey);
+      });
+
+      const hotspotListEl = document.getElementById(`anatomy-hotspots`);
+      if (hotspotListEl) {
+        hotspotListEl.innerHTML = part.hotspots.map(h => `
+          <button type="button" class="hotspot-btn ${h.id === appState.anatomyHotspot ? `is-active` : ``}" onclick="selectHotspot('${h.id}')">
+            <span>${h.name}</span>
+            <span class="stamp stamp-yellow" style="font-size: 0.72rem; padding: 2px 8px;">${h.tag}</span>
+          </button>
+        `).join(``);
+      }
+
+      const activeSpot = part.hotspots.find(h => h.id === appState.anatomyHotspot) || part.hotspots[0];
+      const titleEl = document.getElementById(`anatomy-part-title`);
+      const descEl = document.getElementById(`anatomy-part-desc`);
+      if (titleEl) titleEl.textContent = `${activeSpot.name}（${activeSpot.tag}）`;
+      if (descEl) descEl.textContent = activeSpot.desc;
+
+      const svg = document.getElementById(`anatomy-svg`);
+      if (!svg) return;
+      const sId = activeSpot.id;
+
+      if (partKey === `bulb`) {
+        svg.innerHTML = `
+          <g aria-hidden="true">
+            <rect x="0" y="0" width="420" height="270" fill="var(--background)"/>
+            <!-- Bulb Glass -->
+            <path d="M150,115 C150,55 270,55 270,115 C270,145 245,160 245,180 L175,180 C175,160 150,145 150,115 Z"
+                  fill="${sId === `glass` ? `var(--primary-container)` : `var(--bulb-glass)`}" stroke="var(--outline)" stroke-width="3"/>
+            <!-- Filament support & filament -->
+            <path d="M196,180 L196,115 L204,102 L210,115 L216,102 L224,115 L224,180"
+                  fill="none" stroke="${sId === `filament` ? `var(--tertiary)` : `var(--wire-copper)`}" stroke-width="${sId === `filament` ? `5` : `3`}" stroke-linejoin="round"/>
+            <!-- Metal Thread -->
+            <rect x="175" y="180" width="70" height="42" rx="4"
+                  fill="${sId === `thread` ? `var(--primary-container)` : `var(--metal-silver)`}" stroke="var(--outline)" stroke-width="3"/>
+            <line x1="175" y1="194" x2="245" y2="194" stroke="var(--outline)" stroke-width="2"/>
+            <line x1="175" y1="208" x2="245" y2="208" stroke="var(--outline)" stroke-width="2"/>
+            <!-- Black Insulator collar -->
+            <polygon points="182,222 238,222 226,236 194,236" fill="var(--insulator-dark)" stroke="var(--outline)" stroke-width="2"/>
+            <!-- Base Contact -->
+            <path d="M194,236 L226,236 C224,250 196,250 194,236 Z"
+                  fill="${sId === `base` ? `var(--primary-container)` : `var(--metal-dark)`}" stroke="var(--outline)" stroke-width="3"/>
+
+            <!-- Callout Labels -->
+            <g class="svg-hotspot ${sId === `glass` ? `is-active` : ``}" onclick="selectHotspot('glass')">
+              <line x1="155" y1="90" x2="98" y2="68" stroke="var(--outline)" stroke-width="2"/>
+              <circle class="hotspot-ring" cx="98" cy="68" r="14" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2"/>
+              <text x="98" y="73" text-anchor="middle" font-size="13" font-weight="900" fill="var(--on-surface)">2</text>
+              <text x="72" y="73" text-anchor="end" font-size="13" font-weight="700" fill="var(--on-surface)">玻璃罩</text>
+            </g>
+            <g class="svg-hotspot ${sId === `filament` ? `is-active` : ``}" onclick="selectHotspot('filament')">
+              <line x1="224" y1="104" x2="310" y2="80" stroke="var(--outline)" stroke-width="2"/>
+              <circle class="hotspot-ring" cx="310" cy="80" r="14" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2"/>
+              <text x="310" y="85" text-anchor="middle" font-size="13" font-weight="900" fill="var(--on-surface)">1</text>
+              <text x="332" y="85" text-anchor="start" font-size="13" font-weight="700" fill="var(--on-surface)">燈絲</text>
+            </g>
+            <g class="svg-hotspot ${sId === `thread` ? `is-active` : ``}" onclick="selectHotspot('thread')">
+              <line x1="245" y1="198" x2="310" y2="198" stroke="var(--outline)" stroke-width="2"/>
+              <circle class="hotspot-ring" cx="310" cy="198" r="14" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2"/>
+              <text x="310" y="203" text-anchor="middle" font-size="13" font-weight="900" fill="var(--on-surface)">3</text>
+              <text x="332" y="203" text-anchor="start" font-size="13" font-weight="700" fill="var(--on-surface)">金屬螺紋</text>
+            </g>
+            <g class="svg-hotspot ${sId === `base` ? `is-active` : ``}" onclick="selectHotspot('base')">
+              <line x1="194" y1="242" x2="110" y2="242" stroke="var(--outline)" stroke-width="2"/>
+              <circle class="hotspot-ring" cx="110" cy="242" r="14" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2"/>
+              <text x="110" y="247" text-anchor="middle" font-size="13" font-weight="900" fill="var(--on-surface)">4</text>
+              <text x="88" y="247" text-anchor="end" font-size="13" font-weight="700" fill="var(--on-surface)">底部接點</text>
+            </g>
+          </g>
+        `;
+      } else if (partKey === `battery`) {
+        svg.innerHTML = `
+          <g aria-hidden="true">
+            <rect x="0" y="0" width="420" height="270" fill="var(--background)"/>
+            <!-- Positive Cap -->
+            <rect x="190" y="42" width="40" height="16" rx="3"
+                  fill="${sId === `pos` ? `var(--secondary)` : `var(--battery-cap)`}" stroke="var(--outline)" stroke-width="3"/>
+            <!-- Body -->
+            <rect x="165" y="58" width="90" height="156" rx="8"
+                  fill="${sId === `body` ? `var(--primary-container)` : `var(--battery-body)`}" stroke="var(--outline)" stroke-width="3"/>
+            <rect x="165" y="102" width="90" height="72" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2"/>
+            <text x="210" y="135" text-anchor="middle" font-size="18" font-weight="900" fill="var(--on-surface)">1.5V</text>
+            <text x="210" y="158" text-anchor="middle" font-size="13" font-weight="700" fill="var(--on-surface-variant)">乾電池</text>
+            <text x="210" y="88" text-anchor="middle" font-size="22" font-weight="900" fill="${sId === `body` ? `var(--on-surface)` : `var(--on-primary)`}">+</text>
+            <!-- Negative Base -->
+            <rect x="165" y="214" width="90" height="14" rx="3"
+                  fill="${sId === `neg` ? `var(--primary-container)` : `var(--metal-silver)`}" stroke="var(--outline)" stroke-width="3"/>
+
+            <!-- Hotspots -->
+            <g class="svg-hotspot ${sId === `pos` ? `is-active` : ``}" onclick="selectHotspot('pos')">
+              <line x1="230" y1="50" x2="310" y2="50" stroke="var(--outline)" stroke-width="2"/>
+              <circle class="hotspot-ring" cx="310" cy="50" r="14" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2"/>
+              <text x="310" y="55" text-anchor="middle" font-size="13" font-weight="900" fill="var(--on-surface)">1</text>
+              <text x="332" y="55" text-anchor="start" font-size="13" font-weight="700" fill="var(--on-surface)">正極 (+)</text>
+            </g>
+            <g class="svg-hotspot ${sId === `body` ? `is-active` : ``}" onclick="selectHotspot('body')">
+              <line x1="165" y1="138" x2="98" y2="138" stroke="var(--outline)" stroke-width="2"/>
+              <circle class="hotspot-ring" cx="98" cy="138" r="14" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2"/>
+              <text x="98" y="143" text-anchor="middle" font-size="13" font-weight="900" fill="var(--on-surface)">3</text>
+              <text x="76" y="143" text-anchor="end" font-size="13" font-weight="700" fill="var(--on-surface)">外殼</text>
+            </g>
+            <g class="svg-hotspot ${sId === `neg` ? `is-active` : ``}" onclick="selectHotspot('neg')">
+              <line x1="255" y1="221" x2="310" y2="221" stroke="var(--outline)" stroke-width="2"/>
+              <circle class="hotspot-ring" cx="310" cy="221" r="14" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2"/>
+              <text x="310" y="226" text-anchor="middle" font-size="13" font-weight="900" fill="var(--on-surface)">2</text>
+              <text x="332" y="226" text-anchor="start" font-size="13" font-weight="700" fill="var(--on-surface)">負極 (-)</text>
+            </g>
+          </g>
+        `;
+      } else {
+        svg.innerHTML = `
+          <g aria-hidden="true">
+            <rect x="0" y="0" width="420" height="270" fill="var(--background)"/>
+            <!-- Plastic Jacket -->
+            <rect x="115" y="112" width="190" height="44" rx="10"
+                  fill="${sId === `jacket` ? `var(--primary-container)` : `var(--wire-jacket)`}" stroke="var(--outline)" stroke-width="3"/>
+            <!-- Exposed Copper Ends -->
+            <path d="M55,126 L115,126 M55,134 L115,134 M55,142 L115,142"
+                  stroke="${sId === `copper` ? `var(--tertiary)` : `var(--wire-copper)`}" stroke-width="5" stroke-linecap="round"/>
+            <path d="M305,126 L365,126 M305,134 L365,134 M305,142 L365,142"
+                  stroke="${sId === `copper` ? `var(--tertiary)` : `var(--wire-copper)`}" stroke-width="5" stroke-linecap="round"/>
+
+            <g class="svg-hotspot ${sId === `copper` ? `is-active` : ``}" onclick="selectHotspot('copper')">
+              <line x1="85" y1="120" x2="85" y2="66" stroke="var(--outline)" stroke-width="2"/>
+              <circle class="hotspot-ring" cx="85" cy="66" r="14" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2"/>
+              <text x="85" y="71" text-anchor="middle" font-size="13" font-weight="900" fill="var(--on-surface)">1</text>
+              <text x="108" y="71" text-anchor="start" font-size="13" font-weight="700" fill="var(--on-surface)">內部金屬銅線（導體）</text>
+            </g>
+
+            <g class="svg-hotspot ${sId === `jacket` ? `is-active` : ``}" onclick="selectHotspot('jacket')">
+              <line x1="210" y1="156" x2="210" y2="210" stroke="var(--outline)" stroke-width="2"/>
+              <circle class="hotspot-ring" cx="210" cy="210" r="14" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2"/>
+              <text x="210" y="215" text-anchor="middle" font-size="13" font-weight="900" fill="var(--on-surface)">2</text>
+              <text x="234" y="215" text-anchor="start" font-size="13" font-weight="700" fill="var(--on-surface)">外層塑膠皮（絕緣保護）</text>
+            </g>
+          </g>
+        `;
+      }
+    }
+
+    // =========================================================
+    // 4. SECTION 2: CIRCUIT PRESETS (1-WIRE & ERRORS)
+    // =========================================================
+    function selectCircuitPreset(presetId) {
+      appState.circuitPreset = presetId;
+      if (!appState.visitedCircuits.includes(presetId)) {
+        appState.visitedCircuits.push(presetId);
+      }
+      renderCircuitSection();
+      updateProgress();
+      saveState();
+    }
+
+    function drawMiniBulb(cx, cy, litLevel, rotateDeg) {
+      // litLevel: 0 (off), 1 (normal), 2 (bright), 0.4 (dim)
+      const fill = litLevel >= 2 ? `var(--bulb-lit-bright)` : litLevel === 1 ? `var(--bulb-lit)` : litLevel > 0 ? `var(--bulb-lit-dim)` : `var(--bulb-glass)`;
+      const rays = litLevel > 0 ? `
+        <g stroke="${litLevel >= 2 ? `var(--data-4)` : `var(--primary-container)`}" stroke-width="${litLevel >= 2 ? `4` : `3`}" stroke-linecap="round">
+          <line x1="0" y1="-50" x2="0" y2="-66"/>
+          <line x1="-35" y1="-35" x2="-46" y2="-46"/>
+          <line x1="35" y1="-35" x2="46" y2="-46"/>
+          <line x1="-48" y1="0" x2="-62" y2="0"/>
+          <line x1="48" y1="0" x2="62" y2="0"/>
+        </g>` : ``;
+
+      return `
+        <g transform="translate(${cx}, ${cy}) rotate(${rotateDeg || 0})">
+          ${rays}
+          <circle cx="0" cy="-14" r="26" fill="${fill}" stroke="var(--outline)" stroke-width="3"/>
+          <path d="M-9,8 L-7,-14 L-2,-22 L2,-14 L7,-22 L9,8" fill="none" stroke="var(--wire-copper)" stroke-width="2.5"/>
+          <rect x="-13" y="10" width="26" height="18" rx="3" fill="var(--metal-silver)" stroke="var(--outline)" stroke-width="2.5"/>
+          <line x1="-13" y1="19" x2="13" y2="19" stroke="var(--outline)" stroke-width="2"/>
+          <polygon points="-10,28 10,28 6,35 -6,35" fill="var(--insulator-dark)"/>
+          <circle cx="0" cy="37" r="5" fill="var(--metal-dark)" stroke="var(--outline)" stroke-width="2"/>
+        </g>
+      `;
+    }
+
+    function drawMiniBattery(x, y, flipped) {
+      // upright: + at top, - at bottom. flipped: - at top, + at bottom
+      const topSign = flipped ? `-` : `+`;
+      const botSign = flipped ? `+` : `-`;
+      const capY = flipped ? y + 114 : y - 10;
+      return `
+        <g>
+          <rect x="${x + 18}" y="${capY}" width="24" height="10" rx="2" fill="var(--battery-cap)" stroke="var(--outline)" stroke-width="2.5"/>
+          <rect x="${x}" y="${y}" width="60" height="114" rx="6" fill="var(--battery-body)" stroke="var(--outline)" stroke-width="3"/>
+          <rect x="${x}" y="${y + 30}" width="60" height="54" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2"/>
+          <text x="${x + 30}" y="${y + 62}" text-anchor="middle" font-size="14" font-weight="900" fill="var(--on-surface)">1.5V</text>
+          <text x="${x + 30}" y="${y + 22}" text-anchor="middle" font-size="18" font-weight="900" fill="var(--on-primary)">${topSign}</text>
+          <text x="${x + 30}" y="${y + 105}" text-anchor="middle" font-size="20" font-weight="900" fill="var(--on-primary)">${botSign}</text>
+        </g>
+      `;
+    }
+
+    function renderCircuitSection() {
+      const presetsEl = document.getElementById(`circuit-presets`);
+      if (presetsEl) {
+        presetsEl.innerHTML = CIRCUIT_PRESETS.map(p => `
+          <button type="button" class="btn ${p.id === appState.circuitPreset ? `is-active` : ``}" onclick="selectCircuitPreset('${p.id}')">
+            ${p.btnLabel}
+          </button>
+        `).join(``);
+      }
+
+      const active = CIRCUIT_PRESETS.find(p => p.id === appState.circuitPreset) || CIRCUIT_PRESETS[0];
+      const banner = document.getElementById(`circuit-status-banner`);
+      const badge = document.getElementById(`circuit-badge`);
+      const title = document.getElementById(`circuit-title`);
+      const explain = document.getElementById(`circuit-explain`);
+
+      if (banner) {
+        banner.className = `status-banner ${active.status === `on` ? `status-on` : active.status === `short` ? `status-short` : ``}`;
+      }
+      if (badge) {
+        badge.textContent = active.badge;
+        badge.className = `stamp ${active.status === `on` ? `stamp-positive` : active.status === `short` ? `stamp-error` : ``}`;
+      }
+      if (title) title.textContent = active.title;
+      if (explain) explain.textContent = active.explain;
+
+      const svg = document.getElementById(`circuit-svg`);
+      if (!svg) return;
+
+      let scene = ``;
+      const pid = active.id;
+
+      if (pid === `way1`) {
+        // Upright battery at x=190, y=126; bulb bottom touches + cap at (220, 116) -> bulb center at (220, 79)
+        scene = `
+          ${drawMiniBattery(190, 128, false)}
+          ${drawMiniBulb(220, 81, 1, 0)}
+          <path d="M233,100 C330,100 330,248 220,242" fill="none" stroke="var(--wire-jacket)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M233,100 C330,100 330,248 220,242" class="current-flow"/>
+          <text x="220" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="var(--positive)">通路：正極 → 燈泡底 → 燈絲 → 螺紋 → 電線 → 負極</text>
+        `;
+      } else if (pid === `way2`) {
+        // Upright battery at x=190, y=128; bulb side thread touches + cap (220, 118), rotated -90
+        scene = `
+          ${drawMiniBattery(190, 128, false)}
+          ${drawMiniBulb(201, 105, 1, -90)}
+          <path d="M238,105 C335,105 335,248 220,242" fill="none" stroke="var(--wire-jacket)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M238,105 C335,105 335,248 220,242" class="current-flow"/>
+          <text x="220" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="var(--positive)">通路：正極 → 螺紋 → 燈絲 → 底部接點 → 電線 → 負極</text>
+        `;
+      } else if (pid === `way3`) {
+        // Flipped battery (- at top), bulb bottom touches - at (220, 128)
+        scene = `
+          ${drawMiniBattery(190, 128, true)}
+          ${drawMiniBulb(220, 91, 1, 0)}
+          <path d="M233,110 C330,110 330,256 220,252" fill="none" stroke="var(--wire-jacket)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M233,110 C330,110 330,256 220,252" class="current-flow"/>
+          <text x="220" y="272" text-anchor="middle" font-size="13" font-weight="700" fill="var(--positive)">通路：正極（下）→ 電線 → 螺紋 → 燈絲 → 底部 → 負極（上）</text>
+        `;
+      } else if (pid === `way4`) {
+        // Flipped battery (- at top), bulb side thread touches -
+        scene = `
+          ${drawMiniBattery(190, 128, true)}
+          ${drawMiniBulb(201, 115, 1, -90)}
+          <path d="M238,115 C335,115 335,256 220,252" fill="none" stroke="var(--wire-jacket)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M238,115 C335,115 335,256 220,252" class="current-flow"/>
+          <text x="220" y="272" text-anchor="middle" font-size="13" font-weight="700" fill="var(--positive)">通路：正極（下）→ 電線 → 底部接點 → 燈絲 → 螺紋 → 負極（上）</text>
+        `;
+      } else if (pid === `open`) {
+        // Bulb glass touches battery, or wire only on glass -> open circuit
+        scene = `
+          ${drawMiniBattery(140, 118, false)}
+          ${drawMiniBulb(280, 110, 0, 0)}
+          <path d="M170,108 C170,56 254,68 258,92" fill="none" stroke="var(--wire-jacket)" stroke-width="8" stroke-linecap="round"/>
+          <path d="M170,232 C220,248 280,220 280,147" fill="none" stroke="var(--wire-jacket-alt)" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="258" cy="92" r="10" fill="none" stroke="var(--error)" stroke-width="3"/>
+          <text x="268" y="64" font-size="13" font-weight="900" fill="var(--error)">電線誤接到玻璃罩！（不導電）</text>
+          <text x="220" y="266" text-anchor="middle" font-size="13" font-weight="700" fill="var(--error)">斷路：電流卡在玻璃罩外，沒有形成通路</text>
+        `;
+      } else {
+        // Short circuit!
+        scene = `
+          ${drawMiniBattery(145, 118, false)}
+          ${drawMiniBulb(315, 118, 0, 0)}
+          <path d="M175,108 C235,75 235,248 175,232" fill="none" stroke="var(--wire-jacket-alt)" stroke-width="9" stroke-linecap="round"/>
+          <path d="M175,108 C235,75 235,248 175,232" class="current-flow-danger"/>
+          <path d="M135,140 L122,126 M135,165 L118,165 M135,190 L122,204" stroke="var(--error)" stroke-width="3" stroke-linecap="round"/>
+          <text x="115" y="169" text-anchor="end" font-size="14" font-weight="900" fill="var(--error)">發燙！</text>
+          <text x="230" y="266" text-anchor="middle" font-size="13" font-weight="900" fill="var(--error)">短路警告：電線直接連正負極，沒經過燈泡！</text>
+        `;
+      }
+
+      svg.innerHTML = `<rect x="0" y="0" width="460" height="280" fill="var(--background)"/>${scene}`;
+    }
+
+    // =========================================================
+    // 5. SECTION 3: CONDUCTIVITY TESTER
+    // =========================================================
+    function selectMaterial(matId) {
+      appState.selectedMaterial = matId;
+      renderConductivitySection();
+      saveState();
+    }
+
+    function testMaterial(userPredictedConductor) {
+      const mat = MATERIALS_DATA.find(m => m.id === appState.selectedMaterial);
+      if (!mat) return;
+
+      appState.testedMaterials[mat.id] = {
+        tested: true,
+        guessedRight: userPredictedConductor === mat.isConductor
+      };
+      renderConductivitySection(mat, userPredictedConductor);
+      updateProgress();
+      saveState();
+    }
+
+    function renderConductivitySection(justTestedMat, userGuess) {
+      const grid = document.getElementById(`material-grid`);
+      if (grid) {
+        grid.innerHTML = MATERIALS_DATA.map(m => {
+          const rec = appState.testedMaterials[m.id];
+          const tagHtml = rec
+            ? `<span class="material-tag ${m.isConductor ? `tag-conductor` : `tag-insulator`}">${m.isConductor ? `導體` : `不良導體`}</span>`
+            : `<span class="material-tag">未測試</span>`;
+          return `
+            <button type="button" class="material-btn ${m.id === appState.selectedMaterial ? `is-selected` : ``}" onclick="selectMaterial('${m.id}')">
+              <span>${m.name}</span>
+              ${tagHtml}
+            </button>
+          `;
+        }).join(``);
+      }
+
+      const activeMat = MATERIALS_DATA.find(m => m.id === appState.selectedMaterial) || MATERIALS_DATA[0];
+      const selLabel = document.getElementById(`selected-mat-label`);
+      if (selLabel) selLabel.textContent = `已選擇：${activeMat.name}（${activeMat.note}）`;
+
+      const testedKeys = Object.keys(appState.testedMaterials);
+      const countBadge = document.getElementById(`tested-count-badge`);
+      if (countBadge) countBadge.textContent = `已測試 ${testedKeys.length} / ${MATERIALS_DATA.length} 項`;
+
+      // Update sorted lists
+      const condEl = document.getElementById(`list-conductors`);
+      const insEl = document.getElementById(`list-insulators`);
+      const testedConds = MATERIALS_DATA.filter(m => appState.testedMaterials[m.id] && m.isConductor);
+      const testedIns = MATERIALS_DATA.filter(m => appState.testedMaterials[m.id] && !m.isConductor);
+
+      if (condEl) {
+        condEl.innerHTML = testedConds.length
+          ? testedConds.map(m => `<span class="sorted-chip">${m.name}</span>`).join(``)
+          : `<span style="font-size: 0.9rem; color: var(--on-surface-variant);">測試後會自動分類到這裡</span>`;
+      }
+      if (insEl) {
+        insEl.innerHTML = testedIns.length
+          ? testedIns.map(m => `<span class="sorted-chip">${m.name}</span>`).join(``)
+          : `<span style="font-size: 0.9rem; color: var(--on-surface-variant);">測試後會自動分類到這裡</span>`;
+      }
+
+      // Result text & SVG
+      const isTested = Boolean(appState.testedMaterials[activeMat.id]);
+      const lit = isTested && activeMat.isConductor;
+
+      const resTitle = document.getElementById(`tester-result-title`);
+      const resDesc = document.getElementById(`tester-result-desc`);
+      if (resTitle && resDesc) {
+        if (justTestedMat && justTestedMat.id === activeMat.id) {
+          const guessFeedback = userGuess === activeMat.isConductor ? `恭喜猜對了！` : `哇，跟你想的不一樣喔！`;
+          resTitle.textContent = `${guessFeedback}「${activeMat.name}」是${activeMat.isConductor ? `導體（燈泡亮）` : `不良導體（燈泡不亮）`}`;
+          resDesc.textContent = activeMat.detail;
+        } else if (isTested) {
+          resTitle.textContent = `檢測結果：「${activeMat.name}」是${activeMat.isConductor ? `導體（燈泡亮）` : `不良導體（燈泡不亮）`}`;
+          resDesc.textContent = activeMat.detail;
+        } else {
+          resTitle.textContent = `準備檢測：${activeMat.name}`;
+          resDesc.textContent = `請先在左側點選你的預測（會亮 / 不會亮），物品就會放進檢測夾中！`;
+        }
+      }
+
+      const svg = document.getElementById(`tester-svg`);
+      if (svg) {
+        const objectColor = activeMat.isConductor ? `var(--metal-silver)` : `var(--wood-tone)`;
+        svg.innerHTML = `
+          <rect x="0" y="0" width="420" height="250" fill="var(--background)"/>
+          <!-- Battery on left -->
+          ${drawMiniBattery(52, 74, false)}
+          <!-- Bulb on right -->
+          ${drawMiniBulb(338, 108, lit ? 1 : 0, 0)}
+          <!-- Top wire: Battery + to Bulb bottom -->
+          <path d="M82,64 L82,36 L338,36 L338,145" fill="none" stroke="var(--wire-jacket)" stroke-width="6" stroke-linejoin="round"/>
+          <!-- Wire: Bulb side to right clip -->
+          <path d="M325,127 L270,127 L270,208" fill="none" stroke="var(--wire-jacket-alt)" stroke-width="6" stroke-linejoin="round"/>
+          <!-- Wire: Battery - to left clip -->
+          <path d="M82,188 L82,208 L150,208" fill="none" stroke="var(--wire-jacket)" stroke-width="6" stroke-linejoin="round"/>
+
+          ${lit ? `
+            <path d="M82,64 L82,36 L338,36 L338,145" class="current-flow"/>
+            <path d="M325,127 L270,127 L270,208 L150,208 L82,208 L82,188" class="current-flow"/>
+          ` : ``}
+
+          <!-- Clips -->
+          <rect x="142" y="198" width="16" height="20" rx="2" fill="var(--metal-dark)" stroke="var(--outline)" stroke-width="2"/>
+          <rect x="262" y="198" width="16" height="20" rx="2" fill="var(--metal-dark)" stroke="var(--outline)" stroke-width="2"/>
+
+          <!-- Tested Object between clips -->
+          ${isTested ? `
+            <rect x="158" y="194" width="104" height="28" rx="6" fill="${objectColor}" stroke="var(--outline)" stroke-width="3"/>
+            <text x="210" y="213" text-anchor="middle" font-size="13" font-weight="900" fill="var(--on-surface)">${activeMat.name}</text>
+          ` : `
+            <rect x="160" y="194" width="100" height="28" rx="6" fill="var(--surface-container-low)" stroke="var(--outline)" stroke-width="2" stroke-dasharray="4 4"/>
+            <text x="210" y="213" text-anchor="middle" font-size="12" font-weight="700" fill="var(--on-surface-variant)">待測物品位置</text>
+          `}
+        `;
+      }
+    }
+
+    // =========================================================
+    // 6. SECTION 4: SWITCH LAB
+    // =========================================================
+    function toggleSwitchState() {
+      appState.switchClosed = !appState.switchClosed;
+      renderSwitchSection();
+      saveState();
+    }
+
+    function setSwitchMaterial(mat) {
+      appState.switchMaterial = mat;
+      renderSwitchSection();
+      saveState();
+    }
+
+    function renderSwitchSection() {
+      const btnToggle = document.getElementById(`btn-toggle-switch`);
+      if (btnToggle) {
+        btnToggle.textContent = appState.switchClosed ? `放開開關（斷開）` : `按下開關（接通）`;
+      }
+
+      [`metal`, `plastic`, `paper`].forEach(m => {
+        const b = document.getElementById(`sw-mat-${m}`);
+        if (b) b.classList.toggle(`is-active`, appState.switchMaterial === m);
+      });
+
+      const isConductor = appState.switchMaterial === `metal`;
+      const isLit = appState.switchClosed && isConductor;
+
+      const titleEl = document.getElementById(`switch-status-title`);
+      const descEl = document.getElementById(`switch-status-desc`);
+      if (titleEl && descEl) {
+        if (!appState.switchClosed) {
+          titleEl.textContent = `開關目前是「打開（斷路）」`;
+          descEl.textContent = `壓片向上彈起，沒有碰到左邊的圖釘，電流無法形成迴路，燈泡熄滅。`;
+        } else if (isConductor) {
+          titleEl.textContent = `開關「按下接通（通路）」— 燈泡發亮！`;
+          descEl.textContent = `鐵迴紋針（導體）把兩顆圖釘連起來了，電流順暢流過整個電路，燈泡亮起來！`;
+        } else {
+          titleEl.textContent = `壓下去了，但燈泡還是不亮！（斷路）`;
+          descEl.textContent = `因為你換成了「${appState.switchMaterial === `plastic` ? `塑膠條` : `厚紙板條`}」，是不良導體，就算壓下去碰到圖釘也無法導電喔！`;
+        }
+      }
+
+      const svg = document.getElementById(`switch-svg`);
+      if (!svg) return;
+
+      const bladeFill = appState.switchMaterial === `metal`
+        ? `var(--metal-silver)`
+        : appState.switchMaterial === `plastic`
+        ? `var(--secondary)`
+        : `var(--cardboard-tone)`;
+
+      const bladeAngle = appState.switchClosed ? 0 : -24;
+
+      svg.innerHTML = `
+        <rect x="0" y="0" width="440" height="240" fill="var(--background)"/>
+        <!-- Battery left -->
+        ${drawMiniBattery(50, 62, false)}
+        <!-- Bulb right -->
+        ${drawMiniBulb(350, 92, isLit ? 1 : 0, 0)}
+
+        <!-- Top wire -->
+        <path d="M80,52 L80,28 L350,28 L350,129" fill="none" stroke="var(--wire-jacket)" stroke-width="6" stroke-linejoin="round"/>
+        <!-- Bottom wires to switch pins -->
+        <path d="M80,176 L80,198 L165,198" fill="none" stroke="var(--wire-jacket)" stroke-width="6" stroke-linejoin="round"/>
+        <path d="M337,111 L295,111 L295,198 L265,198" fill="none" stroke="var(--wire-jacket-alt)" stroke-width="6" stroke-linejoin="round"/>
+
+        ${isLit ? `
+          <path d="M80,52 L80,28 L350,28 L350,129" class="current-flow"/>
+          <path d="M337,111 L295,111 L295,198 L165,198 L80,198 L80,176" class="current-flow"/>
+        ` : ``}
+
+        <!-- Cardboard switch base (insulator) -->
+        <rect x="145" y="198" width="140" height="24" rx="4" fill="var(--cardboard-tone)" stroke="var(--outline)" stroke-width="2.5"/>
+        <text x="215" y="215" text-anchor="middle" font-size="11" font-weight="700" fill="var(--on-surface)">厚紙板底座（不良導體）</text>
+
+        <!-- Two thumbtacks -->
+        <circle cx="170" cy="194" r="7" fill="var(--battery-cap)" stroke="var(--outline)" stroke-width="2"/>
+        <circle cx="260" cy="194" r="7" fill="var(--battery-cap)" stroke="var(--outline)" stroke-width="2"/>
+
+        <!-- Hinged switch blade pivoted at (260, 194) -->
+        <g transform="translate(260, 194) rotate(${bladeAngle})">
+          <rect x="-96" y="-8" width="100" height="12" rx="6" fill="${bladeFill}" stroke="var(--outline)" stroke-width="2.5"/>
+        </g>
+        <text x="215" y="152" text-anchor="middle" font-size="12" font-weight="700" fill="var(--on-surface-variant)">
+          ${appState.switchClosed ? `壓下接觸圖釘` : `彈起分開`}
+        </text>
+      `;
+    }
+
+    // =========================================================
+    // 7. SECTION 5: SERIES VS PARALLEL
+    // =========================================================
+    function setSPMode(mode) {
+      if (!SP_MODES[mode]) return;
+      appState.spMode = mode;
+      appState.spFault = false;
+      if (!appState.visitedSP.includes(mode)) {
+        appState.visitedSP.push(mode);
+      }
+      renderSPSection();
+      updateProgress();
+      saveState();
+    }
+
+    function toggleSPFault() {
+      appState.spFault = !appState.spFault;
+      renderSPSection();
+      saveState();
+    }
+
+    function renderSPSection() {
+      const mode = appState.spMode;
+      const info = SP_MODES[mode];
+      if (!info) return;
+
+      Object.keys(SP_MODES).forEach(k => {
+        const btn = document.getElementById(`sp-mode-${k}`);
+        if (btn) btn.classList.toggle(`is-active`, k === mode);
+        const row = document.getElementById(`row-${k}`);
+        if (row) row.classList.toggle(`row-highlight`, k === mode);
+      });
+
+      const faultBtn = document.getElementById(`sp-fault-btn`);
+      const faultBadge = document.getElementById(`sp-fault-badge`);
+      const isBatMode = mode.startsWith(`bat-`);
+
+      if (faultBtn) {
+        faultBtn.textContent = appState.spFault
+          ? `裝回被拿掉的${isBatMode ? `電池` : `燈泡`}`
+          : `測試：${isBatMode ? `拿掉 1 顆電池` : `擰鬆 1 顆燈泡`}`;
+      }
+      if (faultBadge) {
+        faultBadge.textContent = appState.spFault
+          ? `已${isBatMode ? `拿掉第 2 顆電池` : `擰鬆第 1 顆燈泡`}`
+          : `所有零件已裝妥`;
+        faultBadge.className = `stamp ${appState.spFault ? `stamp-pink` : `stamp-positive`}`;
+      }
+
+      const titleEl = document.getElementById(`sp-title`);
+      const descEl = document.getElementById(`sp-desc`);
+      if (titleEl) titleEl.textContent = info.title;
+      if (descEl) descEl.textContent = appState.spFault ? info.descFault : info.descNormal;
+
+      const pct = appState.spFault ? info.brightnessFault : info.brightnessNormal;
+      const valText = appState.spFault ? info.valFault : info.valNormal;
+      const meterBar = document.getElementById(`sp-meter-bar`);
+      const meterVal = document.getElementById(`sp-meter-val`);
+      const meterLabel = document.getElementById(`sp-meter-label`);
+
+      if (meterLabel) {
+        const nameMap = {
+          'bat-series': `電池串聯`,
+          'bat-parallel': `電池並聯`,
+          'bulb-series': `燈泡串聯`,
+          'bulb-parallel': `燈泡並聯`
+        };
+        meterLabel.textContent = nameMap[mode] || `實驗組合`;
+      }
+      if (meterBar) {
+        meterBar.style.width = `${pct}%`;
+        meterBar.className = `meter-bar-fill ${pct >= 90 ? `is-bright` : pct > 0 && pct < 40 ? `is-dim` : ``}`;
+      }
+      if (meterVal) meterVal.textContent = valText;
+
+      // Render SVG Diagram
+      const svg = document.getElementById(`sp-svg`);
+      if (!svg) return;
+      const fault = appState.spFault;
+
+      if (mode === `bat-series`) {
+        // Two batteries in series horizontally at bottom
+        const lit = fault ? 0 : 2;
+        svg.innerHTML = `
+          <rect x="0" y="0" width="460" height="270" fill="var(--background)"/>
+          ${drawMiniBulb(230, 82, lit, 0)}
+          <!-- Wire loop -->
+          <path d="M75,205 L75,101 L217,101 M230,119 L385,119 L385,205 L75,205" fill="none" stroke="var(--wire-jacket)" stroke-width="6" stroke-linejoin="round"/>
+          ${!fault ? `<path d="M75,205 L75,101 L217,101 M230,119 L385,119 L385,205 L75,205" class="current-flow"/>` : ``}
+
+          <!-- Battery 1 (left, + facing right) -->
+          <g transform="translate(115, 178)">
+            <rect x="0" y="0" width="90" height="52" rx="6" fill="var(--battery-body)" stroke="var(--outline)" stroke-width="3"/>
+            <rect x="90" y="14" width="10" height="24" rx="2" fill="var(--battery-cap)" stroke="var(--outline)" stroke-width="2.5"/>
+            <text x="16" y="32" font-size="18" font-weight="900" fill="var(--on-primary)">-</text>
+            <text x="74" y="32" font-size="18" font-weight="900" fill="var(--on-primary)">+</text>
+          </g>
+
+          <!-- Battery 2 (right, + facing right) or Missing Slot -->
+          ${!fault ? `
+            <g transform="translate(230, 178)">
+              <rect x="0" y="0" width="90" height="52" rx="6" fill="var(--battery-body)" stroke="var(--outline)" stroke-width="3"/>
+              <rect x="90" y="14" width="10" height="24" rx="2" fill="var(--battery-cap)" stroke="var(--outline)" stroke-width="2.5"/>
+              <text x="16" y="32" font-size="18" font-weight="900" fill="var(--on-primary)">-</text>
+              <text x="74" y="32" font-size="18" font-weight="900" fill="var(--on-primary)">+</text>
+            </g>
+          ` : `
+            <rect x="230" y="178" width="96" height="52" rx="6" fill="var(--surface-container)" stroke="var(--error)" stroke-width="2.5" stroke-dasharray="5 5"/>
+            <text x="278" y="209" text-anchor="middle" font-size="12" font-weight="900" fill="var(--error)">已拿掉（斷路）</text>
+          `}
+        `;
+      } else if (mode === `bat-parallel`) {
+        const lit = 1;
+        svg.innerHTML = `
+          <rect x="0" y="0" width="460" height="270" fill="var(--background)"/>
+          ${drawMiniBulb(230, 74, lit, 0)}
+          <!-- Main loop -->
+          <path d="M90,152 L90,93 L217,93 M230,111 L370,111 L370,152" fill="none" stroke="var(--wire-jacket)" stroke-width="6" stroke-linejoin="round"/>
+          <!-- Upper battery branch -->
+          <path d="M90,152 L370,152" fill="none" stroke="var(--wire-jacket)" stroke-width="6"/>
+          <!-- Lower battery branch -->
+          <path d="M90,152 L90,224 L370,224 L370,152" fill="none" stroke="var(--wire-jacket-alt)" stroke-width="6" stroke-linejoin="round"/>
+
+          <!-- Current flow -->
+          <path d="M90,152 L90,93 L217,93 M230,111 L370,111 L370,152 L90,152" class="current-flow"/>
+          ${!fault ? `<path d="M90,152 L90,224 L370,224 L370,152" class="current-flow"/>` : ``}
+
+          <!-- Battery 1 (top branch, + facing right) -->
+          <g transform="translate(180, 128)">
+            <rect x="0" y="0" width="90" height="46" rx="6" fill="var(--battery-body)" stroke="var(--outline)" stroke-width="3"/>
+            <rect x="90" y="12" width="10" height="22" rx="2" fill="var(--battery-cap)" stroke="var(--outline)" stroke-width="2.5"/>
+            <text x="16" y="29" font-size="18" font-weight="900" fill="var(--on-primary)">-</text>
+            <text x="74" y="29" font-size="18" font-weight="900" fill="var(--on-primary)">+</text>
+          </g>
+
+          <!-- Battery 2 (bottom branch) -->
+          ${!fault ? `
+            <g transform="translate(180, 200)">
+              <rect x="0" y="0" width="90" height="46" rx="6" fill="var(--battery-body)" stroke="var(--outline)" stroke-width="3"/>
+              <rect x="90" y="12" width="10" height="22" rx="2" fill="var(--battery-cap)" stroke="var(--outline)" stroke-width="2.5"/>
+              <text x="16" y="29" font-size="18" font-weight="900" fill="var(--on-primary)">-</text>
+              <text x="74" y="29" font-size="18" font-weight="900" fill="var(--on-primary)">+</text>
+            </g>
+          ` : `
+            <rect x="180" y="200" width="96" height="46" rx="6" fill="var(--surface-container)" stroke="var(--error)" stroke-width="2.5" stroke-dasharray="5 5"/>
+            <text x="228" y="228" text-anchor="middle" font-size="12" font-weight="900" fill="var(--error)">已拿掉（上路仍通）</text>
+          `}
+        `;
+      } else if (mode === `bulb-series`) {
+        const lit = fault ? 0 : 0.4;
+        svg.innerHTML = `
+          <rect x="0" y="0" width="460" height="270" fill="var(--background)"/>
+          <!-- Single series wire loop connecting thread -> bottom -> thread -> bottom -->
+          <path d="M75,212 L75,99 L142,99 M155,117 L240,117 L240,99 L302,99 M315,117 L400,117 L400,212 L75,212" fill="none" stroke="var(--wire-jacket)" stroke-width="6" stroke-linejoin="round"/>
+          ${!fault ? `<path d="M75,212 L75,99 L142,99 M155,117 L240,117 L240,99 L302,99 M315,117 L400,117 L400,212 L75,212" class="current-flow"/>` : ``}
+
+          <!-- Bulb 1 (left) -->
+          ${!fault ? drawMiniBulb(155, 80, lit, 0) : `
+            <rect x="120" y="54" width="74" height="44" rx="6" fill="var(--surface-container)" stroke="var(--error)" stroke-width="2.5" stroke-dasharray="5 5"/>
+            <text x="157" y="80" text-anchor="middle" font-size="11" font-weight="900" fill="var(--error)">燈泡 1 鬆脫</text>
+          `}
+
+          <!-- Bulb 2 (right) -->
+          ${drawMiniBulb(315, 80, lit, 0)}
+
+          <!-- Battery at bottom -->
+          <g transform="translate(185, 185)">
+            <rect x="0" y="0" width="90" height="52" rx="6" fill="var(--battery-body)" stroke="var(--outline)" stroke-width="3"/>
+            <rect x="90" y="14" width="10" height="24" rx="2" fill="var(--battery-cap)" stroke="var(--outline)" stroke-width="2.5"/>
+            <text x="16" y="32" font-size="18" font-weight="900" fill="var(--on-primary)">-</text>
+            <text x="74" y="32" font-size="18" font-weight="900" fill="var(--on-primary)">+</text>
+          </g>
+        `;
+      } else {
+        // Bulb parallel
+        const lit1 = fault ? 0 : 1;
+        const lit2 = 1;
+        svg.innerHTML = `
+          <rect x="0" y="0" width="460" height="270" fill="var(--background)"/>
+          <!-- Outer loop (Bulb 1 top) -->
+          <path d="M80,216 L80,71 L217,71 M230,89 L380,89 L380,216 L80,216" fill="none" stroke="var(--wire-jacket)" stroke-width="6" stroke-linejoin="round"/>
+          <!-- Inner branch (Bulb 2 middle) -->
+          <path d="M80,151 L217,151 M230,169 L380,169" fill="none" stroke="var(--wire-jacket-alt)" stroke-width="6" stroke-linejoin="round"/>
+
+          ${!fault ? `<path d="M80,151 L80,71 L217,71 M230,89 L380,89 L380,169" class="current-flow"/>` : ``}
+          <path d="M80,216 L80,151 L217,151 M230,169 L380,169 L380,216 L80,216" class="current-flow"/>
+
+          <!-- Bulb 1 (top) -->
+          ${!fault ? drawMiniBulb(230, 52, lit1, 0) : `
+            <rect x="180" y="28" width="100" height="44" rx="6" fill="var(--surface-container)" stroke="var(--error)" stroke-width="2.5" stroke-dasharray="5 5"/>
+            <text x="230" y="54" text-anchor="middle" font-size="11" font-weight="900" fill="var(--error)">燈泡 1 已擰鬆</text>
+          `}
+
+          <!-- Bulb 2 (middle) -->
+          ${drawMiniBulb(230, 132, lit2, 0)}
+
+          <!-- Battery at bottom -->
+          <g transform="translate(185, 190)">
+            <rect x="0" y="0" width="90" height="50" rx="6" fill="var(--battery-body)" stroke="var(--outline)" stroke-width="3"/>
+            <rect x="90" y="13" width="10" height="24" rx="2" fill="var(--battery-cap)" stroke="var(--outline)" stroke-width="2.5"/>
+            <text x="16" y="31" font-size="18" font-weight="900" fill="var(--on-primary)">-</text>
+            <text x="74" y="31" font-size="18" font-weight="900" fill="var(--on-primary)">+</text>
+          </g>
+        `;
+      }
+    }
+
+    // =========================================================
+    // 8. SECTION 6: SAFETY CARDS & QUIZ
+    // =========================================================
+    function toggleSafetyCard(cardEl) {
+      if (!cardEl) return;
+      cardEl.classList.toggle(`is-revealed`);
+    }
+
+    function answerQuiz(qIdx, optIdx) {
+      appState.quizAnswers[qIdx] = optIdx;
+      renderQuiz();
+      updateProgress();
+      saveState();
+    }
+
+    function renderQuiz() {
+      const container = document.getElementById(`quiz-container`);
+      if (!container) return;
+
+      let score = 0;
+      container.innerHTML = QUIZ_DATA.map((item, qIdx) => {
+        const chosen = appState.quizAnswers[qIdx];
+        const hasAnswered = typeof chosen === `number`;
+        const isCorrect = hasAnswered && chosen === item.ans;
+        if (isCorrect) score++;
+
+        const optionsHtml = item.options.map((optText, oIdx) => {
+          let cls = `quiz-opt`;
+          if (hasAnswered) {
+            if (oIdx === item.ans) cls += ` is-correct`;
+            else if (oIdx === chosen) cls += ` is-wrong`;
+          }
+          return `
+            <button type="button" class="${cls}" onclick="answerQuiz(${qIdx}, ${oIdx})">
+              ${String.fromCharCode(65 + oIdx)}. ${optText}
+            </button>
+          `;
+        }).join(``);
+
+        return `
+          <div class="quiz-item">
+            <strong style="font-size: 1.05rem;">${item.q}</strong>
+            <div class="quiz-options">${optionsHtml}</div>
+            <div class="quiz-feedback ${hasAnswered ? `is-visible` : ``}">
+              <strong>${isCorrect ? `答對了！` : `再想一下！`}</strong> ${item.explain}
+            </div>
+          </div>
+        `;
+      }).join(``);
+
+      const scoreBadge = document.getElementById(`quiz-score-badge`);
+      if (scoreBadge) {
+        scoreBadge.textContent = `目前得分：${score} / ${QUIZ_DATA.length}`;
+      }
+    }
+
+    // =========================================================
+    // 9. PROGRESS TRACKER & RESET
+    // =========================================================
+    function updateProgress() {
+      const m1 = appState.visitedAnatomy.length >= 3;
+      const m2 = appState.visitedCircuits.length >= 3;
+      const m3 = Object.keys(appState.testedMaterials).length >= 5;
+      const m4 = appState.visitedSP.length >= 3;
+      const m5 = Object.keys(appState.quizAnswers).length === QUIZ_DATA.length;
+
+      const checks = [
+        { id: `m-anatomy`, done: m1 },
+        { id: `m-circuit`, done: m2 },
+        { id: `m-conductor`, done: m3 },
+        { id: `m-series`, done: m4 },
+        { id: `m-quiz`, done: m5 }
+      ];
+
+      let doneCount = 0;
+      checks.forEach(c => {
+        if (c.done) doneCount++;
+        const el = document.getElementById(c.id);
+        if (el) el.classList.toggle(`done`, c.done);
+      });
+
+      const pctEl = document.getElementById(`progress-pct`);
+      const fillEl = document.getElementById(`progress-fill`);
+      if (pctEl) pctEl.textContent = `${doneCount} / 5`;
+      if (fillEl) fillEl.style.width = `${(doneCount / 5) * 100}%`;
+    }
+
+    function handleResetProgress(btn) {
+      if (!btn) return;
+      if (btn.dataset.armed !== `true`) {
+        btn.dataset.armed = `true`;
+        btn.textContent = `再點一次確認清除紀錄`;
+        btn.classList.add(`btn-primary`);
+        return;
+      }
+      btn.dataset.armed = `false`;
+      btn.textContent = `清除探索紀錄`;
+      btn.classList.remove(`btn-primary`);
+
+      appState.anatomyPart = `bulb`;
+      appState.anatomyHotspot = `filament`;
+      appState.visitedAnatomy = [`bulb:filament`];
+      appState.circuitPreset = `way1`;
+      appState.visitedCircuits = [`way1`];
+      appState.selectedMaterial = `clip`;
+      appState.testedMaterials = {};
+      appState.switchClosed = false;
+      appState.switchMaterial = `metal`;
+      appState.spMode = `bat-series`;
+      appState.spFault = false;
+      appState.visitedSP = [`bat-series`];
+      appState.quizAnswers = {};
+
+      renderAll();
+      saveState();
+    }
+
+    function renderAll() {
+      renderAnatomy();
+      renderCircuitSection();
+      renderConductivitySection();
+      renderSwitchSection();
+      renderSPSection();
+      renderQuiz();
+      updateProgress();
+    }
+
+    // =========================================================
+    // 10. INITIALIZATION
+    // =========================================================
+    async function initApp() {
+      await loadState();
+      renderAll();
+      if (window.notebookAppApi && typeof window.notebookAppApi.notifyAppReady === `function`) {
+        window.notebookAppApi.notifyAppReady();
+      }
+    }
+
+    document.addEventListener(`DOMContentLoaded`, initApp);
+  </script>
+</body>
+</html>
